@@ -1,0 +1,515 @@
+{
+  "backgroundColor": "#FFFFFF",
+  "scrollable": true,
+  "padding": 0,
+  "elements": [
+    {
+      "type": "card",
+      "id": "1",
+      "color": "#F5F5F5",
+      "cornerRadius": 12,
+      "paddingH": 0,
+      "paddingV": 0,
+      "align": "start",
+      "children": [
+        {
+          "type": "card",
+          "id": "1a",
+          "color": "#E0E0E0",
+          "cornerRadius": 0,
+          "paddingH": 16,
+          "paddingV": 10,
+          "children": [
+            {
+              "type": "spacer",
+              "id": "1a1",
+              "height": 4
+            }
+          ]
+        },
+        {
+          "type": "card",
+          "id": "1b",
+          "color": "#F5F5F5",
+          "cornerRadius": 0,
+          "paddingH": 16,
+          "paddingV": 12,
+          "align": "start",
+          "children": [
+            {
+              "type": "text",
+              "id": "1b1",
+              "text": "Test Estimate",
+              "color": "#1A1A1A",
+              "fontSize": 20
+            },
+            {
+              "type": "spacer",
+              "id": "1b2",
+              "height": 8
+            },
+            {
+              "type": "button",
+              "id": "1b3",
+              "text": "Generate Name and Summary",
+              "color": "#1A1A1A",
+              "textColor": "#FFFFFF",
+              "fontSize": 13,
+              "cornerRadius": 20,
+              "actionName": "generate_summary"
+            }
+          ]
+        },
+        {
+          "type": "divider",
+          "id": "1c",
+          "color": "#E0E0E0",
+          "height": 1
+        },
+        {
+          "type": "card",
+          "id": "1d",
+          "color": "#F5F5F5",
+          "cornerRadius": 0,
+          "paddingH": 16,
+          "paddingV": 10,
+          "align": "start",
+          "children": [
+            {
+              "type": "text",
+              "id": "1d1",
+              "text": "Recommend",
+              "color": "#666666",
+              "fontSize": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "id": "10",
+      "color": "#FFFFFF",
+      "cornerRadius": 0,
+      "paddingH": 16,
+      "paddingV": 16,
+      "align": "start",
+      "actionName": "add_summary",
+      "children": [
+        {
+          "type": "row",
+          "id": "10a",
+          "children": [
+            {
+              "type": "text",
+              "id": "10a1",
+              "text": "Summary",
+              "color": "#1A1A1A",
+              "fontSize": 16
+            },
+            {
+              "type": "spacer",
+              "id": "10a1_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "10a2",
+              "text": "Add",
+              "color": "#2196F3",
+              "fontSize": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "id": "11",
+      "color": "#EEEEEE",
+      "height": 1
+    },
+    {
+      "type": "card",
+      "id": "20",
+      "color": "#FFFFFF",
+      "cornerRadius": 0,
+      "paddingH": 16,
+      "paddingV": 16,
+      "align": "start",
+      "actionName": "add_documents",
+      "children": [
+        {
+          "type": "row",
+          "id": "20a",
+          "children": [
+            {
+              "type": "text",
+              "id": "20a1",
+              "text": "Documents",
+              "color": "#1A1A1A",
+              "fontSize": 16
+            },
+            {
+              "type": "spacer",
+              "id": "20a1_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "20a2",
+              "text": "Add",
+              "color": "#2196F3",
+              "fontSize": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "id": "21",
+      "color": "#EEEEEE",
+      "height": 1
+    },
+    {
+      "type": "card",
+      "id": "30",
+      "color": "#FFFFFF",
+      "cornerRadius": 0,
+      "paddingH": 16,
+      "paddingV": 16,
+      "align": "start",
+      "actionName": "add_findings",
+      "children": [
+        {
+          "type": "row",
+          "id": "30a",
+          "children": [
+            {
+              "type": "text",
+              "id": "30a1",
+              "text": "Findings",
+              "color": "#1A1A1A",
+              "fontSize": 16
+            },
+            {
+              "type": "spacer",
+              "id": "30a1_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "30a2",
+              "text": "Add",
+              "color": "#2196F3",
+              "fontSize": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "id": "31",
+      "color": "#EEEEEE",
+      "height": 1
+    },
+    {
+      "type": "card",
+      "id": "40",
+      "color": "#FFFFFF",
+      "cornerRadius": 0,
+      "paddingH": 16,
+      "paddingV": 16,
+      "align": "start",
+      "actionName": "add_rebates",
+      "children": [
+        {
+          "type": "row",
+          "id": "40a",
+          "children": [
+            {
+              "type": "text",
+              "id": "40a1",
+              "text": "Rebates",
+              "color": "#1A1A1A",
+              "fontSize": 16
+            },
+            {
+              "type": "spacer",
+              "id": "40a1_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "40a2",
+              "text": "Add",
+              "color": "#2196F3",
+              "fontSize": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "id": "41",
+      "color": "#EEEEEE",
+      "height": 1
+    },
+    {
+      "type": "card",
+      "id": "50",
+      "color": "#FFFFFF",
+      "cornerRadius": 0,
+      "paddingH": 16,
+      "paddingV": 16,
+      "align": "start",
+      "actionName": "add_energy_savings",
+      "children": [
+        {
+          "type": "row",
+          "id": "50a",
+          "children": [
+            {
+              "type": "text",
+              "id": "50a1",
+              "text": "Energy Savings",
+              "color": "#1A1A1A",
+              "fontSize": 16
+            },
+            {
+              "type": "spacer",
+              "id": "50a1_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "50a2",
+              "text": "Add",
+              "color": "#2196F3",
+              "fontSize": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "id": "51",
+      "color": "#EEEEEE",
+      "height": 1
+    },
+    {
+      "type": "card",
+      "id": "60",
+      "color": "#FFFFFF",
+      "cornerRadius": 0,
+      "paddingH": 16,
+      "paddingV": 16,
+      "align": "start",
+      "actionName": "add_notes",
+      "children": [
+        {
+          "type": "row",
+          "id": "60a",
+          "children": [
+            {
+              "type": "text",
+              "id": "60a1",
+              "text": "Notes",
+              "color": "#1A1A1A",
+              "fontSize": 16
+            },
+            {
+              "type": "spacer",
+              "id": "60a1_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "60a2",
+              "text": "Add",
+              "color": "#2196F3",
+              "fontSize": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "divider",
+      "id": "61",
+      "color": "#EEEEEE",
+      "height": 1
+    },
+    {
+      "type": "card",
+      "id": "70",
+      "color": "#FFFFFF",
+      "cornerRadius": 0,
+      "paddingH": 16,
+      "paddingV": 16,
+      "align": "start",
+      "actionName": "add_items",
+      "children": [
+        {
+          "type": "row",
+          "id": "70a",
+          "children": [
+            {
+              "type": "text",
+              "id": "70a1",
+              "text": "Items",
+              "color": "#1A1A1A",
+              "fontSize": 16
+            },
+            {
+              "type": "spacer",
+              "id": "70a1_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "70a2",
+              "text": "Add",
+              "color": "#2196F3",
+              "fontSize": 14
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "70b",
+          "text": "No items added",
+          "color": "#999999",
+          "fontSize": 13
+        }
+      ]
+    },
+    {
+      "type": "spacer",
+      "id": "80",
+      "height": 12
+    },
+    {
+      "type": "divider",
+      "id": "81",
+      "color": "#EEEEEE",
+      "height": 1
+    },
+    {
+      "type": "spacer",
+      "id": "82",
+      "height": 8
+    },
+    {
+      "type": "card",
+      "id": "90",
+      "color": "#FFFFFF",
+      "cornerRadius": 0,
+      "paddingH": 16,
+      "paddingV": 0,
+      "align": "start",
+      "children": [
+        {
+          "type": "row",
+          "id": "90a",
+          "children": [
+            {
+              "type": "text",
+              "id": "90a1",
+              "text": "Subtotal",
+              "color": "#1A1A1A",
+              "fontSize": 15
+            },
+            {
+              "type": "spacer",
+              "id": "90a1_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "90a2",
+              "text": "$3,012.99",
+              "color": "#1A1A1A",
+              "fontSize": 15
+            }
+          ]
+        },
+        {
+          "type": "spacer",
+          "id": "91",
+          "height": 4
+        },
+        {
+          "type": "row",
+          "id": "92",
+          "children": [
+            {
+              "type": "text",
+              "id": "92a",
+              "text": "Tax",
+              "color": "#1A1A1A",
+              "fontSize": 15
+            },
+            {
+              "type": "spacer",
+              "id": "92a_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "92b",
+              "text": "$0.00",
+              "color": "#1A1A1A",
+              "fontSize": 15
+            }
+          ]
+        },
+        {
+          "type": "spacer",
+          "id": "93",
+          "height": 8
+        },
+        {
+          "type": "divider",
+          "id": "94",
+          "color": "#CCCCCC",
+          "height": 1
+        },
+        {
+          "type": "spacer",
+          "id": "95",
+          "height": 8
+        },
+        {
+          "type": "row",
+          "id": "96",
+          "children": [
+            {
+              "type": "text",
+              "id": "96a",
+              "text": "Total",
+              "color": "#1A1A1A",
+              "fontSize": 18
+            },
+            {
+              "type": "spacer",
+              "id": "96a_sp",
+              "height": 4
+            },
+            {
+              "type": "text",
+              "id": "96b",
+              "text": "$3,012.99",
+              "color": "#1A1A1A",
+              "fontSize": 18
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

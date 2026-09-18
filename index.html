@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remote Compose Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/editor.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <span class="material-icons-round">widgets</span>
+        <div>
+          <h1>Remote Compose Editor</h1>
+          <div class="sub">
+            Drag-and-drop UI builder &middot; <span id="versionLabel">v1</span>
+          </div>
+        </div>
+      </div>
+      <div class="ha">
+        <span class="sb" id="deployStatus"
+          ><span class="dot"></span
+          ><span id="deployStatusText">Ready</span></span
+        >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1.5px solid var(--outline);
+            border-radius: 8px;
+            padding: 2px 4px 2px 8px;
+          "
+        >
+          <input
+            type="password"
+            id="ghToken"
+            placeholder="GitHub Token"
+            style="
+              border: none;
+              outline: none;
+              font-size: 11px;
+              font-family: inherit;
+              width: 160px;
+              background: transparent;
+            "
+          />
+          <button
+            class="btn btn-g btn-s"
+            onclick="toggleToken()"
+            style="padding: 2px"
+          >
+            <span
+              class="material-icons-round"
+              id="tokenEye"
+              style="font-size: 14px"
+              >visibility</span
+            >
+          </button>
+        </div>
+        <button class="btn btn-g" onclick="resetToDefaults()">
+          <span class="material-icons-round">restart_alt</span>Reset
+        </button>
+        <button class="btn btn-o" onclick="copyJson()">
+          <span class="material-icons-round">content_copy</span>Copy JSON
+        </button>
+        <button class="btn btn-p" onclick="deployConfig()">
+          <span class="material-icons-round">cloud_upload</span>Deploy
+        </button>
+      </div>
+    </header>
+    <div class="screen-bar">
+      <span class="lbl">Screen:</span>
+      <button
+        class="screen-tab active"
+        id="tab-home"
+        onclick="switchScreen('home')"
+      >
+        <span class="material-icons-round">home</span>Home
+      </button>
+      <button
+        class="screen-tab"
+        id="tab-detail"
+        onclick="switchScreen('detail')"
+      >
+        <span class="material-icons-round">article</span>Detail
+      </button>
+    </div>
+    <main>
+      <div class="panel">
+        <div class="ph">
+          <h2><span class="material-icons-round">tune</span>Layout Builder</h2>
+          <span style="font-size: 12px; color: var(--ts)" id="elCount"
+            >0 elements</span
+          >
+        </div>
+        <div class="add-bar">
+          <span class="lbl">Add:</span>
+          <button class="btn btn-o btn-s" onclick="addElement('text')">
+            <span class="material-icons-round">title</span>Text
+          </button>
+          <button class="btn btn-o btn-s" onclick="addElement('button')">
+            <span class="material-icons-round">smart_button</span>Button
+          </button>
+          <button class="btn btn-o btn-s" onclick="addElement('spacer')">
+            <span class="material-icons-round">space_bar</span>Spacer
+          </button>
+          <button class="btn btn-o btn-s" onclick="addElement('divider')">
+            <span class="material-icons-round">horizontal_rule</span>Divider
+          </button>
+          <button class="btn btn-o btn-s" onclick="addElement('card')">
+            <span class="material-icons-round">crop_square</span>Card
+          </button>
+          <button class="btn btn-o btn-s" onclick="addElement('row')">
+            <span class="material-icons-round">view_column</span>Row
+          </button>
+        </div>
+        <div class="pb" id="elementList"></div>
+        <div class="bg-sec">
+          <label>Background</label>
+          <div class="cf">
+            <input
+              type="color"
+              id="bgColor"
+              value="#F5F0FF"
+              oninput="updatePreview()"
+            /><code id="bgColorCode">#F5F0FF</code>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel" style="position: sticky; top: 76px">
+          <div class="ph">
+            <h2>
+              <span class="material-icons-round">phone_android</span>Live
+              Preview
+            </h2>
+          </div>
+          <div
+            class="pb"
+            style="display: flex; justify-content: center; padding: 20px 12px"
+          >
+            <div class="phone-frame">
+              <div class="phone-camera"></div>
+              <iframe
+                id="composePreview"
+                src="preview/index.html"
+                onload="onPreviewLoad()"
+                style="
+                  width: 100%;
+                  height: 100%;
+                  border: none;
+                  background: white;
+                "
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div class="toast" id="toast">
+      <span class="material-icons-round" id="toastIcon">check_circle</span
+      ><span id="toastMsg"></span>
+    </div>
+
+    <script src="assets/sample-data.js"></script>
+    <script src="assets/editor.js"></script>
+  </body>
+</html>
