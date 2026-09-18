@@ -1,0 +1,63 @@
+name: Convert and deploy Remote Compose sample
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: remote-compose-pages
+  cancel-in-progress: false
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test editor behavior
+        run: node --test tests/editor.test.mjs
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: gradle
+      - name: Generate binary documents
+        working-directory: server
+        run: ./gradlew run --args="--dir $GITHUB_WORKSPACE $GITHUB_WORKSPACE"
+      - name: Commit generated documents
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add 'config*.rc'
+          if ! git diff --staged --quiet; then
+            git commit -m "Update generated Remote Compose documents"
+            git pull --rebase origin master
+            git push origin HEAD:master
+          fi
+      - name: Prepare public site
+        run: |
+          mkdir _site
+          cp index.html config*.json config*.rc _site/
+          cp -R assets preview _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: convert
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
