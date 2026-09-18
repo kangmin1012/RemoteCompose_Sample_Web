@@ -25,6 +25,8 @@ body {
   font-family:
     "Inter",
     -apple-system,
+    "Apple SD Gothic Neo",
+    "Malgun Gothic",
     sans-serif;
   background: var(--bg);
   color: var(--text);
@@ -389,6 +391,11 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.children-area .child-label > div {
+  flex-wrap: wrap;
 }
 .child-item {
   background: var(--surface);

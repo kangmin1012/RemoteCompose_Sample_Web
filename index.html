@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Remote Compose Editor</title>
+    <title>Remote Compose 편집기</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -20,16 +20,16 @@
       <div class="logo">
         <span class="material-icons-round">widgets</span>
         <div>
-          <h1>Remote Compose Editor</h1>
+          <h1>Remote Compose 편집기</h1>
           <div class="sub">
-            Drag-and-drop UI builder &middot; <span id="versionLabel">v1</span>
+            드래그로 만드는 UI &middot; <span id="versionLabel">v1</span>
           </div>
         </div>
       </div>
       <div class="ha">
         <span class="sb" id="deployStatus"
           ><span class="dot"></span
-          ><span id="deployStatusText">Ready</span></span
+          ><span id="deployStatusText">준비됨</span></span
         >
         <div
           style="
@@ -44,7 +44,7 @@
           <input
             type="password"
             id="ghToken"
-            placeholder="GitHub Token"
+            placeholder="GitHub 토큰"
             style="
               border: none;
               outline: none;
@@ -57,6 +57,7 @@
           <button
             class="btn btn-g btn-s"
             onclick="toggleToken()"
+            aria-label="토큰 표시"
             style="padding: 2px"
           >
             <span
@@ -68,65 +69,65 @@
           </button>
         </div>
         <button class="btn btn-g" onclick="resetToDefaults()">
-          <span class="material-icons-round">restart_alt</span>Reset
+          <span class="material-icons-round">restart_alt</span>초기화
         </button>
         <button class="btn btn-o" onclick="copyJson()">
-          <span class="material-icons-round">content_copy</span>Copy JSON
+          <span class="material-icons-round">content_copy</span>JSON 복사
         </button>
         <button class="btn btn-p" onclick="deployConfig()">
-          <span class="material-icons-round">cloud_upload</span>Deploy
+          <span class="material-icons-round">cloud_upload</span>배포
         </button>
       </div>
     </header>
     <div class="screen-bar">
-      <span class="lbl">Screen:</span>
+      <span class="lbl">화면:</span>
       <button
         class="screen-tab active"
         id="tab-home"
         onclick="switchScreen('home')"
       >
-        <span class="material-icons-round">home</span>Home
+        <span class="material-icons-round">home</span>홈
       </button>
       <button
         class="screen-tab"
         id="tab-detail"
         onclick="switchScreen('detail')"
       >
-        <span class="material-icons-round">article</span>Detail
+        <span class="material-icons-round">article</span>상세
       </button>
     </div>
     <main>
       <div class="panel">
         <div class="ph">
-          <h2><span class="material-icons-round">tune</span>Layout Builder</h2>
+          <h2><span class="material-icons-round">tune</span>레이아웃 편집</h2>
           <span style="font-size: 12px; color: var(--ts)" id="elCount"
-            >0 elements</span
+            >요소 0개</span
           >
         </div>
         <div class="add-bar">
-          <span class="lbl">Add:</span>
+          <span class="lbl">추가:</span>
           <button class="btn btn-o btn-s" onclick="addElement('text')">
-            <span class="material-icons-round">title</span>Text
+            <span class="material-icons-round">title</span>텍스트
           </button>
           <button class="btn btn-o btn-s" onclick="addElement('button')">
-            <span class="material-icons-round">smart_button</span>Button
+            <span class="material-icons-round">smart_button</span>버튼
           </button>
           <button class="btn btn-o btn-s" onclick="addElement('spacer')">
-            <span class="material-icons-round">space_bar</span>Spacer
+            <span class="material-icons-round">space_bar</span>세로 여백
           </button>
           <button class="btn btn-o btn-s" onclick="addElement('divider')">
-            <span class="material-icons-round">horizontal_rule</span>Divider
+            <span class="material-icons-round">horizontal_rule</span>구분선
           </button>
           <button class="btn btn-o btn-s" onclick="addElement('card')">
-            <span class="material-icons-round">crop_square</span>Card
+            <span class="material-icons-round">crop_square</span>카드
           </button>
           <button class="btn btn-o btn-s" onclick="addElement('row')">
-            <span class="material-icons-round">view_column</span>Row
+            <span class="material-icons-round">view_column</span>가로 배치
           </button>
         </div>
         <div class="pb" id="elementList"></div>
         <div class="bg-sec">
-          <label>Background</label>
+          <label>배경색</label>
           <div class="cf">
             <input
               type="color"
@@ -141,8 +142,8 @@
         <div class="panel" style="position: sticky; top: 76px">
           <div class="ph">
             <h2>
-              <span class="material-icons-round">phone_android</span>Live
-              Preview
+              <span class="material-icons-round">phone_android</span>실시간
+              미리보기
             </h2>
           </div>
           <div
@@ -153,6 +154,7 @@
               <div class="phone-camera"></div>
               <iframe
                 id="composePreview"
+                title="Remote Compose 실시간 미리보기"
                 src="preview/index.html"
                 onload="onPreviewLoad()"
                 style="

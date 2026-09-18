@@ -1,10 +1,21 @@
 // Change these two values when using your own repository.
 const REPO = "kangmin1012",
   REPO_N = "RemoteCompose_Sample_Web";
+// Display labels stay separate from the Remote Compose JSON type names.
+const elementLabels = {
+  text: "텍스트",
+  button: "버튼",
+  spacer: "세로 여백",
+  hspacer: "가로 여백",
+  divider: "구분선",
+  card: "카드",
+  row: "가로 배치",
+  icon: "아이콘",
+};
 const screens = {
   home: {
     file: "config.json",
-    label: "Home",
+    label: "홈",
     elements: [],
     bg: "#F5F0FF",
     scrollable: false,
@@ -12,7 +23,7 @@ const screens = {
   },
   detail: {
     file: "config_detail.json",
-    label: "Detail",
+    label: "상세",
     elements: [],
     bg: "#F0F4F8",
     scrollable: false,
@@ -108,7 +119,7 @@ function resetToDefaults() {
   nextId = 1;
   Object.keys(screens).forEach(loadScreenDefs);
   activateScreen();
-  showToast("Reset to defaults", "restart_alt");
+  showToast("기본 구성으로 초기화했습니다", "restart_alt");
 }
 function addElement(type) {
   const el = { type, id: uid() };
@@ -247,36 +258,36 @@ function buildGcEditor(gc, i, ci, gi) {
     `onGrandchildField(${i},${ci},${gi},'${field}',this.value)`;
   let html = "";
   if (gc.type === "text") {
-    html += `<div class="field"><label>Text</label><input type="text" value="${esc(gc.text || "")}" oninput="${f("text")}"></div>
-        <div class="fr"><div class="field"><label>Size</label><input type="number" min="8" max="72" value="${gc.fontSize || 14}" oninput="${f("fontSize")}"></div>
-        <div class="field"><label>Color</label><div class="cf"><input type="color" value="${gc.color || "#000000"}" oninput="${f("color")}"><code>${(gc.color || "#000000").toUpperCase()}</code></div></div></div>
-        <div class="fr"><div class="field"><label>Pad H</label><input type="number" min="0" max="50" value="${gc.paddingH || 0}" oninput="${f("paddingH")}"></div>
-        <div class="field"><label>Pad V</label><input type="number" min="0" max="50" value="${gc.paddingV || 0}" oninput="${f("paddingV")}"></div></div>`;
+    html += `<div class="field"><label>텍스트</label><input type="text" value="${esc(gc.text || "")}" oninput="${f("text")}"></div>
+        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${gc.fontSize || 14}" oninput="${f("fontSize")}"></div>
+        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${gc.color || "#000000"}" oninput="${f("color")}"><code>${(gc.color || "#000000").toUpperCase()}</code></div></div></div>
+        <div class="fr"><div class="field"><label>좌우 안쪽 여백</label><input type="number" min="0" max="50" value="${gc.paddingH || 0}" oninput="${f("paddingH")}"></div>
+        <div class="field"><label>상하 안쪽 여백</label><input type="number" min="0" max="50" value="${gc.paddingV || 0}" oninput="${f("paddingV")}"></div></div>`;
   } else if (gc.type === "button") {
-    html += `<div class="field"><label>Label</label><input type="text" value="${esc(gc.text || "")}" oninput="${f("text")}"></div>
-        <div class="field"><label>Action</label><input type="text" value="${esc(gc.actionName || "")}" oninput="${f("actionName")}" placeholder="e.g. navigate:detail"></div>
-        <div class="fr"><div class="field"><label>Size</label><input type="number" min="8" max="72" value="${gc.fontSize || 14}" oninput="${f("fontSize")}"></div>
-        <div class="field"><label>Radius</label><input type="number" min="0" max="50" value="${gc.cornerRadius || 20}" oninput="${f("cornerRadius")}"></div></div>
-        <div class="fr"><div class="field"><label>BG</label><div class="cf"><input type="color" value="${gc.color || "#6200EA"}" oninput="${f("color")}"><code>${(gc.color || "#6200EA").toUpperCase()}</code></div></div>
-        <div class="field"><label>Text</label><div class="cf"><input type="color" value="${gc.textColor || "#FFFFFF"}" oninput="${f("textColor")}"><code>${(gc.textColor || "#FFFFFF").toUpperCase()}</code></div></div></div>
-        <div class="fr"><div class="field"><label>Border</label><div class="cf"><input type="color" value="${gc.borderColor || "#000000"}" oninput="${f("borderColor")}"><code>${(gc.borderColor || "").toUpperCase() || "none"}</code></div></div>
-        <div class="field"><label>Border W</label><input type="number" min="0" max="10" value="${gc.borderWidth || 0}" oninput="${f("borderWidth")}"></div></div>`;
+    html += `<div class="field"><label>버튼 문구</label><input type="text" value="${esc(gc.text || "")}" oninput="${f("text")}"></div>
+        <div class="field"><label>액션</label><input type="text" value="${esc(gc.actionName || "")}" oninput="${f("actionName")}" placeholder="예: navigate:detail"></div>
+        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${gc.fontSize || 14}" oninput="${f("fontSize")}"></div>
+        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${gc.cornerRadius || 20}" oninput="${f("cornerRadius")}"></div></div>
+        <div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${gc.color || "#6200EA"}" oninput="${f("color")}"><code>${(gc.color || "#6200EA").toUpperCase()}</code></div></div>
+        <div class="field"><label>글자 색상</label><div class="cf"><input type="color" value="${gc.textColor || "#FFFFFF"}" oninput="${f("textColor")}"><code>${(gc.textColor || "#FFFFFF").toUpperCase()}</code></div></div></div>
+        <div class="fr"><div class="field"><label>테두리 색상</label><div class="cf"><input type="color" value="${gc.borderColor || "#000000"}" oninput="${f("borderColor")}"><code>${(gc.borderColor || "").toUpperCase() || "없음"}</code></div></div>
+        <div class="field"><label>테두리 두께</label><input type="number" min="0" max="10" value="${gc.borderWidth || 0}" oninput="${f("borderWidth")}"></div></div>`;
   } else if (gc.type === "spacer") {
-    html += `<div class="field"><label>Height (dp)</label><input type="number" min="1" max="200" value="${gc.height || 16}" oninput="${f("height")}"></div>`;
+    html += `<div class="field"><label>높이 (dp)</label><input type="number" min="1" max="200" value="${gc.height || 16}" oninput="${f("height")}"></div>`;
   } else if (gc.type === "hspacer") {
-    html += `<div class="field"><label>Width (dp)</label><input type="number" min="1" max="200" value="${gc.width || 16}" oninput="${f("width")}"></div>`;
+    html += `<div class="field"><label>너비 (dp)</label><input type="number" min="1" max="200" value="${gc.width || 16}" oninput="${f("width")}"></div>`;
   } else if (gc.type === "divider") {
-    html += `<div class="fr"><div class="field"><label>Height</label><input type="number" min="1" max="10" value="${gc.height || 1}" oninput="${f("height")}"></div>
-        <div class="field"><label>Color</label><div class="cf"><input type="color" value="${gc.color || "#CCCCCC"}" oninput="${f("color")}"><code>${(gc.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
+    html += `<div class="fr"><div class="field"><label>높이</label><input type="number" min="1" max="10" value="${gc.height || 1}" oninput="${f("height")}"></div>
+        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${gc.color || "#CCCCCC"}" oninput="${f("color")}"><code>${(gc.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
   } else if (gc.type === "card") {
-    html += `<div class="fr"><div class="field"><label>BG</label><div class="cf"><input type="color" value="${gc.color || "#FFFFFF"}" oninput="${f("color")}"><code>${(gc.color || "#FFFFFF").toUpperCase()}</code></div></div>
-        <div class="field"><label>Radius</label><input type="number" min="0" max="50" value="${gc.cornerRadius || 0}" oninput="${f("cornerRadius")}"></div></div>
-        <div class="fr"><div class="field"><label>Pad H</label><input type="number" min="0" max="50" value="${gc.paddingH || 0}" oninput="${f("paddingH")}"></div>
-        <div class="field"><label>Pad V</label><input type="number" min="0" max="50" value="${gc.paddingV || 0}" oninput="${f("paddingV")}"></div></div>`;
+    html += `<div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${gc.color || "#FFFFFF"}" oninput="${f("color")}"><code>${(gc.color || "#FFFFFF").toUpperCase()}</code></div></div>
+        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${gc.cornerRadius || 0}" oninput="${f("cornerRadius")}"></div></div>
+        <div class="fr"><div class="field"><label>좌우 안쪽 여백</label><input type="number" min="0" max="50" value="${gc.paddingH || 0}" oninput="${f("paddingH")}"></div>
+        <div class="field"><label>상하 안쪽 여백</label><input type="number" min="0" max="50" value="${gc.paddingV || 0}" oninput="${f("paddingV")}"></div></div>`;
   }
   return (
     html ||
-    '<div style="font-size:11px;color:#999">No editable properties</div>'
+    '<div style="font-size:11px;color:#999">편집 가능한 속성이 없습니다</div>'
   );
 }
 function addChild(parentIdx, type) {
@@ -424,30 +435,30 @@ function onGcDrop(e, pi, ci, gi) {
 function render() {
   const list = document.getElementById("elementList");
   document.getElementById("elCount").textContent =
-    elements.length + " element" + (elements.length !== 1 ? "s" : "");
+    "요소 " + elements.length + "개";
   if (!elements.length) {
     list.innerHTML =
-      '<div class="empty-state"><span class="material-icons-round">add_circle_outline</span><p>No elements yet. Add one above.</p></div>';
+      '<div class="empty-state"><span class="material-icons-round">add_circle_outline</span><p>아직 요소가 없습니다. 위에서 추가해 보세요.</p></div>';
     updatePreview();
     return;
   }
   list.innerHTML = elements
     .map((el, i) => {
-      const badge = `<span class="badge ${el.type}">${el.type}</span>`;
+      const badge = `<span class="badge ${el.type}">${elementLabels[el.type] || el.type}</span>`;
       let summary = "";
-      if (el.type === "text") summary = el.text || "Empty";
-      else if (el.type === "button") summary = el.text || "Button";
+      if (el.type === "text") summary = el.text || "내용 없음";
+      else if (el.type === "button") summary = el.text || "버튼";
       else if (el.type === "spacer") summary = (el.height || 16) + "dp";
-      else if (el.type === "hspacer") summary = (el.width || 16) + "dp wide";
-      else if (el.type === "divider") summary = "Line";
+      else if (el.type === "hspacer") summary = (el.width || 16) + "dp 너비";
+      else if (el.type === "divider") summary = "구분선";
       else if (el.type === "card")
         summary =
           (el.children?.length || 0) +
-          " children" +
-          (el.actionName ? " (clickable)" : "");
+          "개 하위 요소" +
+          (el.actionName ? " (클릭 가능)" : "");
       else if (el.type === "row")
-        summary = (el.children?.length || 0) + " items";
-      else if (el.type === "icon") summary = el.text || "icon";
+        summary = (el.children?.length || 0) + "개 항목";
+      else if (el.type === "icon") summary = el.text || "아이콘";
       let editor = buildEditor(el, i);
       return `<div class="el-card" draggable="true" ondragstart="onDragStart(event,${i})" ondragend="onDragEnd()" ondragover="onDragOver(event,${i})" ondrop="onDrop(event,${i})">
             <div class="el-handle"><span class="material-icons-round">drag_indicator</span></div>
@@ -455,7 +466,7 @@ function render() {
                 <div class="el-top" role="button" tabindex="0" onclick="toggleExpand(${i})" style="cursor:pointer">${badge}<span class="el-summary">${esc(summary)}</span></div>
                 <div class="el-editor">${editor}</div>
             </div>
-            <div class="el-actions"><button class="del" onclick="event.stopPropagation();removeElement(${i})" title="Delete"><span class="material-icons-round">close</span></button></div>
+            <div class="el-actions"><button class="del" onclick="event.stopPropagation();removeElement(${i})" title="삭제"><span class="material-icons-round">close</span></button></div>
         </div>`;
     })
     .join("");
@@ -478,82 +489,82 @@ function render() {
 function buildEditor(el, i) {
   if (el.type === "text")
     return `
-        <div class="field"><label>Text</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)"></div>
-        <div class="fr"><div class="field"><label>Size</label><input type="number" min="8" max="72" value="${el.fontSize || 16}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
-        <div class="field"><label>Color</label><div class="cf"><input type="color" value="${el.color || "#000000"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#000000").toUpperCase()}</code></div></div></div>
-        <div class="fr"><div class="field"><label>Pad H</label><input type="number" min="0" max="50" value="${el.paddingH || 0}" oninput="onFieldChange(${i},'paddingH',this.value)"></div>
-        <div class="field"><label>Pad V</label><input type="number" min="0" max="50" value="${el.paddingV || 0}" oninput="onFieldChange(${i},'paddingV',this.value)"></div></div>`;
+        <div class="field"><label>텍스트</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)"></div>
+        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${el.fontSize || 16}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
+        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${el.color || "#000000"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#000000").toUpperCase()}</code></div></div></div>
+        <div class="fr"><div class="field"><label>좌우 안쪽 여백</label><input type="number" min="0" max="50" value="${el.paddingH || 0}" oninput="onFieldChange(${i},'paddingH',this.value)"></div>
+        <div class="field"><label>상하 안쪽 여백</label><input type="number" min="0" max="50" value="${el.paddingV || 0}" oninput="onFieldChange(${i},'paddingV',this.value)"></div></div>`;
   if (el.type === "button")
     return `
-        <div class="field"><label>Label</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)"></div>
-        <div class="field"><label>Action Name</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)" placeholder="e.g. open_settings"></div>
-        <div class="fr"><div class="field"><label>Size</label><input type="number" min="8" max="72" value="${el.fontSize || 16}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
-        <div class="field"><label>Radius</label><input type="number" min="0" max="50" value="${el.cornerRadius || 24}" oninput="onFieldChange(${i},'cornerRadius',this.value)"></div></div>
-        <div class="fr"><div class="field"><label>BG</label><div class="cf"><input type="color" value="${el.color || "#6200EA"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#6200EA").toUpperCase()}</code></div></div>
-        <div class="field"><label>Text</label><div class="cf"><input type="color" value="${el.textColor || "#FFFFFF"}" oninput="onFieldChange(${i},'textColor',this.value)"><code>${(el.textColor || "#FFFFFF").toUpperCase()}</code></div></div>
-        <div class="field"><label>Border</label><div class="cf"><input type="color" value="${el.borderColor || "#000000"}" oninput="onFieldChange(${i},'borderColor',this.value)"><code>${(el.borderColor || "").toUpperCase() || "none"}</code></div></div></div>
-        <div class="fr"><div class="field"><label>Border W</label><input type="number" min="0" max="10" value="${el.borderWidth || 0}" oninput="onFieldChange(${i},'borderWidth',this.value)"></div></div>`;
+        <div class="field"><label>버튼 문구</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)"></div>
+        <div class="field"><label>액션 이름</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)" placeholder="예: open_settings"></div>
+        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${el.fontSize || 16}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
+        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${el.cornerRadius || 24}" oninput="onFieldChange(${i},'cornerRadius',this.value)"></div></div>
+        <div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${el.color || "#6200EA"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#6200EA").toUpperCase()}</code></div></div>
+        <div class="field"><label>글자 색상</label><div class="cf"><input type="color" value="${el.textColor || "#FFFFFF"}" oninput="onFieldChange(${i},'textColor',this.value)"><code>${(el.textColor || "#FFFFFF").toUpperCase()}</code></div></div>
+        <div class="field"><label>테두리 색상</label><div class="cf"><input type="color" value="${el.borderColor || "#000000"}" oninput="onFieldChange(${i},'borderColor',this.value)"><code>${(el.borderColor || "").toUpperCase() || "없음"}</code></div></div></div>
+        <div class="fr"><div class="field"><label>테두리 두께</label><input type="number" min="0" max="10" value="${el.borderWidth || 0}" oninput="onFieldChange(${i},'borderWidth',this.value)"></div></div>`;
   if (el.type === "spacer")
-    return `<div class="field"><label>Height (dp)</label><input type="number" min="1" max="200" value="${el.height || 16}" oninput="onFieldChange(${i},'height',this.value)"></div>`;
+    return `<div class="field"><label>높이 (dp)</label><input type="number" min="1" max="200" value="${el.height || 16}" oninput="onFieldChange(${i},'height',this.value)"></div>`;
   if (el.type === "divider")
-    return `<div class="fr"><div class="field"><label>Height</label><input type="number" min="1" max="10" value="${el.height || 1}" oninput="onFieldChange(${i},'height',this.value)"></div><div class="field"><label>Color</label><div class="cf"><input type="color" value="${el.color || "#CCCCCC"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
+    return `<div class="fr"><div class="field"><label>높이</label><input type="number" min="1" max="10" value="${el.height || 1}" oninput="onFieldChange(${i},'height',this.value)"></div><div class="field"><label>색상</label><div class="cf"><input type="color" value="${el.color || "#CCCCCC"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
   if (el.type === "card")
     return `
-        <div class="fr"><div class="field"><label>BG Color</label><div class="cf"><input type="color" value="${el.color || "#FFFFFF"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#FFFFFF").toUpperCase()}</code></div></div>
-        <div class="field"><label>Radius</label><input type="number" min="0" max="50" value="${el.cornerRadius || 16}" oninput="onFieldChange(${i},'cornerRadius',this.value)"></div></div>
-        <div class="fr"><div class="field"><label>Border</label><div class="cf"><input type="color" value="${el.borderColor || "#CCCCCC"}" oninput="onFieldChange(${i},'borderColor',this.value)"><code>${(el.borderColor || "").toUpperCase() || "none"}</code></div></div>
-        <div class="field"><label>Border W</label><input type="number" min="0" max="10" value="${el.borderWidth || 0}" oninput="onFieldChange(${i},'borderWidth',this.value)"></div></div>
-        <div class="field"><label>Action (optional)</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)" placeholder="Makes card clickable"></div>
+        <div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${el.color || "#FFFFFF"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#FFFFFF").toUpperCase()}</code></div></div>
+        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${el.cornerRadius || 16}" oninput="onFieldChange(${i},'cornerRadius',this.value)"></div></div>
+        <div class="fr"><div class="field"><label>테두리 색상</label><div class="cf"><input type="color" value="${el.borderColor || "#CCCCCC"}" oninput="onFieldChange(${i},'borderColor',this.value)"><code>${(el.borderColor || "").toUpperCase() || "없음"}</code></div></div>
+        <div class="field"><label>테두리 두께</label><input type="number" min="0" max="10" value="${el.borderWidth || 0}" oninput="onFieldChange(${i},'borderWidth',this.value)"></div></div>
+        <div class="field"><label>액션 (선택)</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)" placeholder="클릭 시 실행할 액션을 입력하세요"></div>
         ${childrenEditor(el, i, "text")}`;
   if (el.type === "row") return childrenEditor(el, i, "button");
   if (el.type === "icon")
     return `
-        <div class="field"><label>Icon Name</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)" placeholder="content_copy, more_vert"></div>
-        <div class="fr"><div class="field"><label>Size</label><input type="number" min="12" max="48" value="${el.fontSize || 24}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
-        <div class="field"><label>Color</label><div class="cf"><input type="color" value="${el.color || "#333333"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#333333").toUpperCase()}</code></div></div></div>
-        <div class="field"><label>Action</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)"></div>`;
+        <div class="field"><label>아이콘 이름</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)" placeholder="content_copy, more_vert"></div>
+        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="12" max="48" value="${el.fontSize || 24}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
+        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${el.color || "#333333"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#333333").toUpperCase()}</code></div></div></div>
+        <div class="field"><label>액션</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)"></div>`;
   return "";
 }
 
 function childrenEditor(el, i, defaultChild) {
   const children = el.children || [];
   let html =
-    '<div class="children-area" onclick="event.stopPropagation()"><div class="child-label"><span>Children (' +
+    '<div class="children-area" onclick="event.stopPropagation()"><div class="child-label"><span>하위 요소 (' +
     children.length +
     ')</span><div style="display:flex;gap:4px">';
   html +=
     '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
     i +
-    ",'text')\">Text</button>";
+    ",'text')\">텍스트</button>";
   html +=
     '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
     i +
-    ",'button')\">Button</button>";
+    ",'button')\">버튼</button>";
   html +=
     '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
     i +
-    ",'spacer')\">Spacer</button>";
+    ",'spacer')\">세로 여백</button>";
   html +=
     '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
     i +
-    ",'hspacer')\">H Spacer</button>";
+    ",'hspacer')\">가로 여백</button>";
   html +=
     '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
     i +
-    ",'divider')\">Divider</button>";
+    ",'divider')\">구분선</button>";
   html +=
     '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
     i +
-    ",'card')\">Card</button>";
+    ",'card')\">카드</button>";
   html += "</div></div>";
   children.forEach((ch, ci) => {
-    const summary = ch.text || ch.type;
+    const summary = ch.text || elementLabels[ch.type] || ch.type;
     html += `<div class="child-item" id="child-${i}-${ci}" style="display:flex;align-items:stretch" draggable="true" ondragstart="onChildDragStart(event,${i},${ci})" ondragend="onChildDragEnd(event)" ondragover="onChildDragOver(event,${i},${ci})" ondrop="onChildDrop(event,${i},${ci})">`;
     html += `<div style="flex:1;min-width:0">`;
-    html += `<div class="child-hdr" role="button" tabindex="0" onclick="toggleChildExpand(${i},${ci})"><span class="badge ${ch.type}">${ch.type}</span><span class="child-summary">${esc(summary)}</span></div>`;
+    html += `<div class="child-hdr" role="button" tabindex="0" onclick="toggleChildExpand(${i},${ci})"><span class="badge ${ch.type}">${elementLabels[ch.type] || ch.type}</span><span class="child-summary">${esc(summary)}</span></div>`;
     html += `<div class="child-editor">${buildChildEditor(ch, i, ci)}</div>`;
     html += `</div>`;
-    html += `<button class="child-del-btn" onclick="event.stopPropagation();removeChild(${i},${ci})" title="Remove" style="align-self:flex-start;margin:6px 4px 0 0"><span class="material-icons-round" style="font-size:16px">close</span></button>`;
+    html += `<button class="child-del-btn" onclick="event.stopPropagation();removeChild(${i},${ci})" title="삭제" style="align-self:flex-start;margin:6px 4px 0 0"><span class="material-icons-round" style="font-size:16px">close</span></button>`;
     html += `</div>`;
   });
   html += "</div>";
@@ -563,40 +574,43 @@ function childrenEditor(el, i, defaultChild) {
 function buildChildEditor(ch, i, ci) {
   let html = "";
   if (ch.type === "text") {
-    html += `<div class="field"><label>Text</label><input type="text" value="${esc(ch.text || "")}" oninput="onChildField(${i},${ci},'text',this.value)"></div>
-        <div class="fr"><div class="field"><label>Size</label><input type="number" min="8" max="72" value="${ch.fontSize || 14}" oninput="onChildField(${i},${ci},'fontSize',this.value)"></div>
-        <div class="field"><label>Color</label><div class="cf"><input type="color" value="${ch.color || "#000000"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#000000").toUpperCase()}</code></div></div></div>`;
+    html += `<div class="field"><label>텍스트</label><input type="text" value="${esc(ch.text || "")}" oninput="onChildField(${i},${ci},'text',this.value)"></div>
+        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${ch.fontSize || 14}" oninput="onChildField(${i},${ci},'fontSize',this.value)"></div>
+        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${ch.color || "#000000"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#000000").toUpperCase()}</code></div></div></div>`;
   } else if (ch.type === "button") {
-    html += `<div class="field"><label>Label</label><input type="text" value="${esc(ch.text || "")}" oninput="onChildField(${i},${ci},'text',this.value)"></div>
-        <div class="field"><label>Action</label><input type="text" value="${esc(ch.actionName || "")}" oninput="onChildField(${i},${ci},'actionName',this.value)" placeholder="e.g. navigate:detail"></div>
-        <div class="fr"><div class="field"><label>Size</label><input type="number" min="8" max="72" value="${ch.fontSize || 14}" oninput="onChildField(${i},${ci},'fontSize',this.value)"></div>
-        <div class="field"><label>Radius</label><input type="number" min="0" max="50" value="${ch.cornerRadius || 20}" oninput="onChildField(${i},${ci},'cornerRadius',this.value)"></div></div>
-        <div class="fr"><div class="field"><label>BG</label><div class="cf"><input type="color" value="${ch.color || "#6200EA"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#6200EA").toUpperCase()}</code></div></div>
-        <div class="field"><label>Text</label><div class="cf"><input type="color" value="${ch.textColor || "#FFFFFF"}" oninput="onChildField(${i},${ci},'textColor',this.value)"><code>${(ch.textColor || "#FFFFFF").toUpperCase()}</code></div></div></div>`;
+    html += `<div class="field"><label>버튼 문구</label><input type="text" value="${esc(ch.text || "")}" oninput="onChildField(${i},${ci},'text',this.value)"></div>
+        <div class="field"><label>액션</label><input type="text" value="${esc(ch.actionName || "")}" oninput="onChildField(${i},${ci},'actionName',this.value)" placeholder="예: navigate:detail"></div>
+        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${ch.fontSize || 14}" oninput="onChildField(${i},${ci},'fontSize',this.value)"></div>
+        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${ch.cornerRadius || 20}" oninput="onChildField(${i},${ci},'cornerRadius',this.value)"></div></div>
+        <div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${ch.color || "#6200EA"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#6200EA").toUpperCase()}</code></div></div>
+        <div class="field"><label>글자 색상</label><div class="cf"><input type="color" value="${ch.textColor || "#FFFFFF"}" oninput="onChildField(${i},${ci},'textColor',this.value)"><code>${(ch.textColor || "#FFFFFF").toUpperCase()}</code></div></div></div>`;
   } else if (ch.type === "spacer") {
-    html += `<div class="field"><label>Height (dp)</label><input type="number" min="1" max="200" value="${ch.height || 16}" oninput="onChildField(${i},${ci},'height',this.value)"></div>`;
+    html += `<div class="field"><label>높이 (dp)</label><input type="number" min="1" max="200" value="${ch.height || 16}" oninput="onChildField(${i},${ci},'height',this.value)"></div>`;
   } else if (ch.type === "hspacer") {
-    html += `<div class="field"><label>Width (dp)</label><input type="number" min="1" max="200" value="${ch.width || 16}" oninput="onChildField(${i},${ci},'width',this.value)"></div>`;
+    html += `<div class="field"><label>너비 (dp)</label><input type="number" min="1" max="200" value="${ch.width || 16}" oninput="onChildField(${i},${ci},'width',this.value)"></div>`;
   } else if (ch.type === "divider") {
-    html += `<div class="fr"><div class="field"><label>Height</label><input type="number" min="1" max="10" value="${ch.height || 1}" oninput="onChildField(${i},${ci},'height',this.value)"></div>
-        <div class="field"><label>Color</label><div class="cf"><input type="color" value="${ch.color || "#CCCCCC"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
+    html += `<div class="fr"><div class="field"><label>높이</label><input type="number" min="1" max="10" value="${ch.height || 1}" oninput="onChildField(${i},${ci},'height',this.value)"></div>
+        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${ch.color || "#CCCCCC"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
   } else if (ch.type === "card") {
-    html += `<div class="fr"><div class="field"><label>BG</label><div class="cf"><input type="color" value="${ch.color || "#FFFFFF"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#FFFFFF").toUpperCase()}</code></div></div>
-        <div class="field"><label>Radius</label><input type="number" min="0" max="50" value="${ch.cornerRadius || 0}" oninput="onChildField(${i},${ci},'cornerRadius',this.value)"></div></div>
-        <div class="fr"><div class="field"><label>Pad H</label><input type="number" min="0" max="50" value="${ch.paddingH || 0}" oninput="onChildField(${i},${ci},'paddingH',this.value)"></div>
-        <div class="field"><label>Pad V</label><input type="number" min="0" max="50" value="${ch.paddingV || 0}" oninput="onChildField(${i},${ci},'paddingV',this.value)"></div></div>`;
+    html += `<div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${ch.color || "#FFFFFF"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#FFFFFF").toUpperCase()}</code></div></div>
+        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${ch.cornerRadius || 0}" oninput="onChildField(${i},${ci},'cornerRadius',this.value)"></div></div>
+        <div class="fr"><div class="field"><label>좌우 안쪽 여백</label><input type="number" min="0" max="50" value="${ch.paddingH || 0}" oninput="onChildField(${i},${ci},'paddingH',this.value)"></div>
+        <div class="field"><label>상하 안쪽 여백</label><input type="number" min="0" max="50" value="${ch.paddingV || 0}" oninput="onChildField(${i},${ci},'paddingV',this.value)"></div></div>`;
     if (ch.children && ch.children.length) {
       html += `<div style="margin-top:8px;padding:8px;background:var(--surface);border:1px dashed var(--outline);border-radius:6px" onclick="event.stopPropagation()">`;
-      html += `<div style="font-size:10px;font-weight:600;color:var(--ts);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Nested (${ch.children.length})</div>`;
+      html += `<div style="font-size:10px;font-weight:600;color:var(--ts);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">중첩 요소 (${ch.children.length})</div>`;
       ch.children.forEach((gc, gi) => {
         const gcSummary =
-          gc.text || gc.type + " " + (gc.height ? gc.height + "dp" : "");
+          gc.text ||
+          (elementLabels[gc.type] || gc.type) +
+            " " +
+            (gc.height ? gc.height + "dp" : "");
         html += `<div class="child-item" id="gc-${i}-${ci}-${gi}" style="display:flex;align-items:stretch" draggable="true" ondragstart="onGcDragStart(event,${i},${ci},${gi})" ondragend="onChildDragEnd(event)" ondragover="onGcDragOver(event,${i},${ci},${gi})" ondrop="onGcDrop(event,${i},${ci},${gi})">`;
         html += `<div style="flex:1;min-width:0">`;
-        html += `<div class="child-hdr" role="button" tabindex="0" onclick="event.stopPropagation();toggleGcExpand(${i},${ci},${gi})"><span class="badge ${gc.type}">${gc.type}</span><span class="child-summary">${esc(gcSummary)}</span></div>`;
+        html += `<div class="child-hdr" role="button" tabindex="0" onclick="event.stopPropagation();toggleGcExpand(${i},${ci},${gi})"><span class="badge ${gc.type}">${elementLabels[gc.type] || gc.type}</span><span class="child-summary">${esc(gcSummary)}</span></div>`;
         html += `<div class="child-editor" onclick="event.stopPropagation()">${buildGcEditor(gc, i, ci, gi)}</div>`;
         html += `</div>`;
-        html += `<button class="child-del-btn" onclick="event.stopPropagation();removeGrandchild(${i},${ci},${gi})" title="Remove" style="align-self:flex-start;margin:6px 4px 0 0"><span class="material-icons-round" style="font-size:16px">close</span></button>`;
+        html += `<button class="child-del-btn" onclick="event.stopPropagation();removeGrandchild(${i},${ci},${gi})" title="삭제" style="align-self:flex-start;margin:6px 4px 0 0"><span class="material-icons-round" style="font-size:16px">close</span></button>`;
         html += `</div>`;
       });
       html += `</div>`;
@@ -604,7 +618,7 @@ function buildChildEditor(ch, i, ci) {
   }
   return (
     html ||
-    '<div style="font-size:11px;color:#999">No editable properties</div>'
+    '<div style="font-size:11px;color:#999">편집 가능한 속성이 없습니다</div>'
   );
 }
 
@@ -723,12 +737,12 @@ async function copyJson() {
     document.execCommand("copy");
     document.body.removeChild(t);
   }
-  showToast("JSON copied", "content_copy");
+  showToast("JSON을 복사했습니다", "content_copy");
 }
 async function deployConfig() {
   const token = document.getElementById("ghToken").value.trim();
   if (!token) {
-    showToast("Enter a GitHub token first", "warning", true);
+    showToast("먼저 GitHub 토큰을 입력하세요", "warning", true);
     document.getElementById("ghToken").focus();
     return;
   }
@@ -764,16 +778,19 @@ async function deployConfig() {
     );
     if (r.ok) {
       setDeploy("deployed");
-      showToast(screens[activeScreen].label + " deployed!", "cloud_done");
+      showToast(
+        screens[activeScreen].label + " 화면을 배포했습니다",
+        "cloud_done",
+      );
       pollActionStatus(token);
     } else {
       const e = await r.json();
       setDeploy("err");
-      showToast("Deploy failed: " + (e.message || r.status), "error", true);
+      showToast("배포 실패: " + (e.message || r.status), "error", true);
     }
   } catch (e) {
     setDeploy("err");
-    showToast("Deploy failed: " + e.message, "error", true);
+    showToast("배포 실패: " + e.message, "error", true);
   }
 }
 
@@ -785,41 +802,41 @@ function setDeploy(s) {
   if (s === "deploying") {
     stopDeployTimer();
     b.className = "sb";
-    t.textContent = "Deploying...";
+    t.textContent = "배포 중...";
   } else if (s === "deployed") {
     b.className = "sb ok";
-    t.textContent = "Deployed \u2713";
+    t.textContent = "배포 완료 \u2713";
     deployStartTime = Date.now();
     startDeployTimer();
   } else if (s === "action_done") {
     stopDeployTimer();
     b.className = "sb ok";
-    t.textContent = "\u2713 Binary ready";
-    showToast("Binary .rc files generated!", "check_circle");
+    t.textContent = "\u2713 바이너리 준비 완료";
+    showToast("바이너리 .rc 파일을 생성했습니다", "check_circle");
     setTimeout(() => {
       b.className = "sb";
-      t.textContent = "Ready";
+      t.textContent = "준비됨";
     }, 8000);
   } else if (s === "action_fail") {
     stopDeployTimer();
     b.className = "sb err";
-    t.textContent = "\u2717 Action failed";
+    t.textContent = "\u2717 자동 빌드 실패";
     setTimeout(() => {
       b.className = "sb";
-      t.textContent = "Ready";
+      t.textContent = "준비됨";
     }, 8000);
   } else if (s === "err") {
     stopDeployTimer();
     b.className = "sb err";
-    t.textContent = "Failed";
+    t.textContent = "실패";
     setTimeout(() => {
       b.className = "sb";
-      t.textContent = "Ready";
+      t.textContent = "준비됨";
     }, 5000);
   } else {
     stopDeployTimer();
     b.className = "sb";
-    t.textContent = "Ready";
+    t.textContent = "준비됨";
   }
 }
 function startDeployTimer() {
@@ -830,9 +847,9 @@ function startDeployTimer() {
     const elapsed = Math.round((Date.now() - deployStartTime) / 1000);
     const mins = Math.floor(elapsed / 60);
     const secs = elapsed % 60;
-    const timeStr = mins > 0 ? mins + "m " + secs + "s" : secs + "s";
+    const timeStr = mins > 0 ? mins + "분 " + secs + "초" : secs + "초";
     b.className = "sb action";
-    t.textContent = "\u2699 Building binary... " + timeStr;
+    t.textContent = "\u2699 바이너리 생성 중... " + timeStr;
   }, 1000);
 }
 function stopDeployTimer() {
@@ -886,9 +903,11 @@ function toggleToken() {
   if (i.type === "password") {
     i.type = "text";
     ic.textContent = "visibility_off";
+    ic.closest("button").setAttribute("aria-label", "토큰 숨기기");
   } else {
     i.type = "password";
     ic.textContent = "visibility";
+    ic.closest("button").setAttribute("aria-label", "토큰 표시");
   }
 }
 let toastTimer;
