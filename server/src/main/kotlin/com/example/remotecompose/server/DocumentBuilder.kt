@@ -82,7 +82,8 @@ private fun renderText(writer: RemoteComposeWriter, el: ElementConfig) {
 
     val padH = el.paddingH ?: 0
     val padV = el.paddingV ?: 0
-    val mod = RecordingModifier()
+    // Match the preview's Text modifier, including its bottom spacing.
+    val mod = RecordingModifier().padding(0f, 0f, 0f, dp(8))
     if (padH > 0 || padV > 0) {
         mod.padding(dp(padH), dp(padV), dp(padH), dp(padV))
     }
@@ -95,7 +96,6 @@ private fun renderButton(writer: RemoteComposeWriter, el: ElementConfig, fillWid
     val bgColor = parseArgb(el.color ?: "#6200EA")
     val textColor = parseArgb(el.textColor ?: "#FFFFFF")
     val borderW = el.borderWidth ?: 0
-    val borderColor = if (el.borderColor != null && borderW > 0) parseArgb(el.borderColor!!) else bgColor
     val shape = RoundedRectShape(dp(radius), dp(radius), dp(radius), dp(radius))
 
     val actionName = el.actionName ?: el.id.ifEmpty { el.text ?: "button" }
@@ -104,8 +104,10 @@ private fun renderButton(writer: RemoteComposeWriter, el: ElementConfig, fillWid
     if (fillWidth) mod.fillMaxWidth()
     mod.clip(shape)
         .background(bgColor)
-        .border(dp(if (borderW > 0) borderW else 1), dp(radius), borderColor, ShapeType.ROUNDED_RECTANGLE)
-        .onClick(HostAction(ACTION_BUTTON_CLICKED, writer.addText(actionName)))
+    if (el.borderColor != null && borderW > 0) {
+        mod.border(dp(borderW), dp(radius), parseArgb(el.borderColor!!), ShapeType.ROUNDED_RECTANGLE)
+    }
+    mod.onClick(HostAction(ACTION_BUTTON_CLICKED, writer.addText(actionName)))
         .padding(dp(el.paddingH ?: 32), dp(el.paddingV ?: 14), dp(el.paddingH ?: 32), dp(el.paddingV ?: 14))
 
     val textId = writer.addText(el.text ?: "Button")
@@ -133,7 +135,6 @@ private fun renderDivider(writer: RemoteComposeWriter, el: ElementConfig) {
         .fillMaxWidth()
         .height(dp(el.height ?: 1))
         .background(color)
-        .padding(0f, dp(8), 0f, dp(8))
     writer.startBox(mod)
     writer.endBox()
 }
@@ -156,15 +157,17 @@ private fun renderCard(writer: RemoteComposeWriter, el: ElementConfig) {
 
     val mod = RecordingModifier().fillMaxWidth()
 
-    if (cardBorderColor != null && borderW > 0) {
-        mod.border(dp(borderW), dp(radius), parseArgb(cardBorderColor), ShapeType.ROUNDED_RECTANGLE)
-    }
-
     if (radius > 0) {
         mod.clip(shape)
     }
 
     mod.background(cardBg)
+
+    // Remote Compose paints modifiers in recording order. Draw the border
+    // after the background so the fill cannot cover its inner stroke.
+    if (cardBorderColor != null && borderW > 0) {
+        mod.border(dp(borderW), dp(radius), parseArgb(cardBorderColor), ShapeType.ROUNDED_RECTANGLE)
+    }
 
     val cardAction = el.actionName
     if (cardAction != null) {

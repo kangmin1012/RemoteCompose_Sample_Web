@@ -30,6 +30,14 @@ cd server
 ./gradlew run --args="--dir .. .."
 ```
 
+Android 테두리 회귀 테스트용 문서는 `server/src/test/fixtures/`에서 생성합니다. 두 저장소가 같은 상위 폴더에 있을 때 `server/`에서 다음 명령으로 테스트 문서를 갱신합니다.
+
+```sh
+./gradlew run --args="--dir src/test/fixtures ../../RemoteComposeSample/app/src/androidTest/assets"
+```
+
+변환기는 미리보기처럼 배경 위에 테두리를 그리고, 명시된 버튼 테두리만 적용하며, 텍스트 아래에 8dp 여백을 둡니다. 웹은 나눔고딕, Android 플레이어는 시스템 글꼴을 사용하므로 글자 폭과 줄바꿈은 다를 수 있습니다. 화면을 비교할 때는 앱 상단 바를 제외한 콘텐츠 영역의 크기도 맞춰 주세요.
+
 ```sh
 cd preview-src
 ./gradlew wasmJsBrowserDistribution

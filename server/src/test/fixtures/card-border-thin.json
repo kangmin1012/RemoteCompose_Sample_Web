@@ -1,0 +1,21 @@
+{
+  "backgroundColor": "#FFFFFF",
+  "padding": 24,
+  "elements": [
+    {
+      "type": "card",
+      "color": "#FF0000",
+      "cornerRadius": 16,
+      "borderColor": "#0000FF",
+      "borderWidth": 1,
+      "paddingH": 16,
+      "paddingV": 16,
+      "children": [
+        {
+          "type": "spacer",
+          "height": 64
+        }
+      ]
+    }
+  ]
+}
