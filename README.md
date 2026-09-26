@@ -42,7 +42,7 @@ cd preview-src
 - `index.html`, `assets/editor.css`: 화면 구조와 스타일.
 - `assets/editor.js`: 요소 편집, 드래그, JSON 생성, GitHub 저장 및 Actions 진행 표시.
 - `assets/sample-data.js`: Reset과 불러오기 실패 시 사용할 기본 화면.
-- `config*.json` / `config*.rc`: 화면 정의와 변환 결과. Estimates 두 화면은 앱용 추가 예제이며 참고 Editor처럼 탭은 Home·Detail만 제공합니다.
+- `config*.json` / `config*.rc`: 화면 정의와 변환 결과. Home·Detail 두 화면을 제공하며, 기본 화면 이동 액션은 Home → Detail 하나입니다. 돌아가기는 Android 앱의 뒤로가기를 사용합니다.
 - `server/`: JSON 모델과 `RemoteComposeWriter` 기반 변환 코드.
 - `preview-src/`, `preview/`: Kotlin/Wasm 소스와 배포용 미리보기. JSON 모델은 변환기의 소스를 공유합니다.
 - `.github/workflows/convert.yml`: 테스트 → 변환 → 생성 파일 커밋 → Pages 배포.

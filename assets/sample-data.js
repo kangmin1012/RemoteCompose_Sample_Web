@@ -183,15 +183,6 @@ const defaultsDetail = [
       },
       {
         type: "button",
-        text: "Navigate",
-        color: "#00897B",
-        textColor: "#FFFFFF",
-        fontSize: 13,
-        cornerRadius: 20,
-        actionName: "navigate:home",
-      },
-      {
-        type: "button",
         text: "Alert",
         color: "#C62828",
         textColor: "#FFFFFF",

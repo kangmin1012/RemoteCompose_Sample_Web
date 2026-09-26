@@ -166,16 +166,6 @@
         },
         {
           "type": "button",
-          "id": "13b",
-          "text": "Navigate",
-          "color": "#00897B",
-          "textColor": "#FFFFFF",
-          "fontSize": 13,
-          "cornerRadius": 20,
-          "actionName": "navigate:home"
-        },
-        {
-          "type": "button",
           "id": "13c",
           "text": "Alert",
           "color": "#C62828",
