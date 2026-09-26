@@ -1,10 +1,10 @@
 // Sample layouts used by Reset and when a config cannot be loaded.
 const defaultsHome = [
-  { type: "text", text: "Remote Compose", color: "#4A148C", fontSize: 32 },
+  { type: "text", text: "리모트 컴포즈", color: "#4A148C", fontSize: 32 },
   { type: "spacer", height: 4 },
   {
     type: "text",
-    text: "Server-driven UI, rendered natively",
+    text: "서버에서 구성하고 앱에서 그리는 화면",
     color: "#7E57C2",
     fontSize: 14,
   },
@@ -18,11 +18,11 @@ const defaultsHome = [
     paddingH: 20,
     paddingV: 16,
     children: [
-      { type: "text", text: "Dynamic Layouts", color: "#1A1A2E", fontSize: 18 },
+      { type: "text", text: "자유로운 화면 구성", color: "#1A1A2E", fontSize: 18 },
       { type: "spacer", height: 4 },
       {
         type: "text",
-        text: "Add, remove, reorder UI elements from the web — no app update needed.",
+        text: "앱 업데이트 없이 웹에서 화면 요소를 추가·삭제하고 순서를 바꿔 보세요.",
         color: "#666666",
         fontSize: 13,
       },
@@ -39,11 +39,11 @@ const defaultsHome = [
     paddingV: 16,
     actionName: "card_tap",
     children: [
-      { type: "text", text: "Click Handling", color: "#1A1A2E", fontSize: 18 },
+      { type: "text", text: "클릭 이벤트 처리", color: "#1A1A2E", fontSize: 18 },
       { type: "spacer", height: 4 },
       {
         type: "text",
-        text: "Tap this card — the click event is handled by the host app.",
+        text: "카드를 눌러 보세요. 앱에서 클릭 이벤트를 처리합니다.",
         color: "#666666",
         fontSize: 13,
       },
@@ -55,7 +55,7 @@ const defaultsHome = [
     children: [
       {
         type: "button",
-        text: "Action A",
+        text: "액션 A",
         color: "#6200EA",
         textColor: "#FFFFFF",
         fontSize: 14,
@@ -64,7 +64,7 @@ const defaultsHome = [
       },
       {
         type: "button",
-        text: "Action B",
+        text: "액션 B",
         color: "#00897B",
         textColor: "#FFFFFF",
         fontSize: 14,
@@ -78,7 +78,7 @@ const defaultsHome = [
   { type: "spacer", height: 6 },
   {
     type: "button",
-    text: "Go to Detail Screen",
+    text: "상세 화면으로 이동",
     color: "#4A148C",
     textColor: "#FFFFFF",
     fontSize: 16,
@@ -90,18 +90,18 @@ const defaultsHome = [
   { type: "spacer", height: 8 },
   {
     type: "text",
-    text: "Change anything from the browser. No app update needed.",
+    text: "앱 업데이트 없이 브라우저에서 화면을 바꿔 보세요.",
     color: "#9CA3AF",
     fontSize: 12,
   },
 ];
 const defaultsDetail = [
   { type: "spacer", height: 8 },
-  { type: "text", text: "Feature Showcase", color: "#1A1A2E", fontSize: 26 },
+  { type: "text", text: "주요 기능 살펴보기", color: "#1A1A2E", fontSize: 26 },
   { type: "spacer", height: 4 },
   {
     type: "text",
-    text: "Everything below is server-driven",
+    text: "아래 화면은 모두 서버에서 구성합니다.",
     color: "#6B7280",
     fontSize: 13,
   },
@@ -115,11 +115,11 @@ const defaultsDetail = [
     paddingH: 18,
     paddingV: 14,
     children: [
-      { type: "text", text: "Remote Layouts", color: "#6200EA", fontSize: 16 },
+      { type: "text", text: "서버에서 구성하는 화면", color: "#6200EA", fontSize: 16 },
       { type: "spacer", height: 4 },
       {
         type: "text",
-        text: "Text, buttons, cards, rows, spacers, dividers \u2014 all rendered natively via Remote Compose.",
+        text: "텍스트, 버튼, 카드, 가로 배치, 여백, 구분선을 리모트 컴포즈로 앱에서 그립니다.",
         color: "#6B7280",
         fontSize: 12,
       },
@@ -135,11 +135,11 @@ const defaultsDetail = [
     paddingH: 18,
     paddingV: 14,
     children: [
-      { type: "text", text: "Click Actions", color: "#00897B", fontSize: 16 },
+      { type: "text", text: "클릭 액션", color: "#00897B", fontSize: 16 },
       { type: "spacer", height: 4 },
       {
         type: "text",
-        text: "Buttons fire HostAction events. The app handles them \u2014 toasts, navigation, or custom logic.",
+        text: "버튼을 누르면 앱에서 이벤트를 받아 메시지 표시나 화면 이동 등을 처리합니다.",
         color: "#6B7280",
         fontSize: 12,
       },
@@ -156,11 +156,11 @@ const defaultsDetail = [
     paddingV: 14,
     actionName: "card_clicked",
     children: [
-      { type: "text", text: "Clickable Cards", color: "#C62828", fontSize: 16 },
+      { type: "text", text: "클릭할 수 있는 카드", color: "#C62828", fontSize: 16 },
       { type: "spacer", height: 4 },
       {
         type: "text",
-        text: "Tap this card. The entire surface is a click target, not just a button.",
+        text: "카드를 눌러 보세요. 카드 전체 영역이 클릭에 반응합니다.",
         color: "#6B7280",
         fontSize: 12,
       },
@@ -174,7 +174,7 @@ const defaultsDetail = [
     children: [
       {
         type: "button",
-        text: "Toast",
+        text: "메시지",
         color: "#6200EA",
         textColor: "#FFFFFF",
         fontSize: 13,
@@ -183,7 +183,7 @@ const defaultsDetail = [
       },
       {
         type: "button",
-        text: "Alert",
+        text: "알림",
         color: "#C62828",
         textColor: "#FFFFFF",
         fontSize: 13,
@@ -195,7 +195,7 @@ const defaultsDetail = [
   { type: "spacer", height: 12 },
   {
     type: "text",
-    text: "No app update required.",
+    text: "앱을 업데이트할 필요가 없습니다.",
     color: "#9CA3AF",
     fontSize: 11,
   },

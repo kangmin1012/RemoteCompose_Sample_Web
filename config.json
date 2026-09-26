@@ -4,7 +4,7 @@
     {
       "type": "text",
       "id": "1",
-      "text": "Remote Compose",
+      "text": "리모트 컴포즈",
       "color": "#4A148C",
       "fontSize": 32
     },
@@ -16,7 +16,7 @@
     {
       "type": "text",
       "id": "3",
-      "text": "Server-driven UI, rendered natively",
+      "text": "서버에서 구성하고 앱에서 그리는 화면",
       "color": "#7E57C2",
       "fontSize": 14
     },
@@ -38,7 +38,7 @@
         {
           "type": "text",
           "id": "6",
-          "text": "Dynamic Layouts",
+          "text": "자유로운 화면 구성",
           "color": "#1A1A2E",
           "fontSize": 18
         },
@@ -50,7 +50,7 @@
         {
           "type": "text",
           "id": "8",
-          "text": "Add, remove, reorder UI elements from the web \u2014 no app update needed.",
+          "text": "앱 업데이트 없이 웹에서 화면 요소를 추가·삭제하고 순서를 바꿔 보세요.",
           "color": "#666666",
           "fontSize": 13
         }
@@ -75,7 +75,7 @@
         {
           "type": "text",
           "id": "11",
-          "text": "Click Handling",
+          "text": "클릭 이벤트 처리",
           "color": "#1A1A2E",
           "fontSize": 18
         },
@@ -87,7 +87,7 @@
         {
           "type": "text",
           "id": "13",
-          "text": "Tap this card \u2014 the click event is handled by the host app.",
+          "text": "카드를 눌러 보세요. 앱에서 클릭 이벤트를 처리합니다.",
           "color": "#666666",
           "fontSize": 13
         }
@@ -105,7 +105,7 @@
         {
           "type": "button",
           "id": "16",
-          "text": "Action A",
+          "text": "액션 A",
           "color": "#6200EA",
           "textColor": "#FFFFFF",
           "fontSize": 14,
@@ -115,7 +115,7 @@
         {
           "type": "button",
           "id": "17",
-          "text": "Action B",
+          "text": "액션 B",
           "color": "#00897B",
           "textColor": "#FFFFFF",
           "fontSize": 14,
@@ -143,7 +143,7 @@
     {
       "type": "button",
       "id": "21",
-      "text": "Go to Detail Screen",
+      "text": "상세 화면으로 이동",
       "color": "#4A148C",
       "textColor": "#FFFFFF",
       "fontSize": 16,
@@ -160,7 +160,7 @@
     {
       "type": "text",
       "id": "23",
-      "text": "Change anything from the browser. No app update needed.",
+      "text": "앱 업데이트 없이 브라우저에서 화면을 바꿔 보세요.",
       "color": "#9CA3AF",
       "fontSize": 12
     }

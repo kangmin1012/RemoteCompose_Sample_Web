@@ -124,11 +124,11 @@ function resetToDefaults() {
 function addElement(type) {
   const el = { type, id: uid() };
   if (type === "text") {
-    el.text = "New text";
+    el.text = "새 텍스트";
     el.color = "#000000";
     el.fontSize = 16;
   } else if (type === "button") {
-    el.text = "Button";
+    el.text = "버튼";
     el.color = "#6200EA";
     el.textColor = "#FFFFFF";
     el.fontSize = 16;
@@ -148,7 +148,7 @@ function addElement(type) {
       {
         type: "text",
         id: uid(),
-        text: "Card content",
+        text: "카드 내용",
         color: "#333333",
         fontSize: 14,
       },
@@ -158,7 +158,7 @@ function addElement(type) {
       {
         type: "button",
         id: uid(),
-        text: "Left",
+        text: "왼쪽",
         color: "#6200EA",
         textColor: "#FFFFFF",
         fontSize: 14,
@@ -167,7 +167,7 @@ function addElement(type) {
       {
         type: "button",
         id: uid(),
-        text: "Right",
+        text: "오른쪽",
         color: "#00897B",
         textColor: "#FFFFFF",
         fontSize: 14,
@@ -293,11 +293,11 @@ function buildGcEditor(gc, i, ci, gi) {
 function addChild(parentIdx, type) {
   const ch = { type, id: uid() };
   if (type === "text") {
-    ch.text = "New text";
+    ch.text = "새 텍스트";
     ch.color = "#333333";
     ch.fontSize = 14;
   } else if (type === "button") {
-    ch.text = "Button";
+    ch.text = "버튼";
     ch.color = "#6200EA";
     ch.textColor = "#FFFFFF";
     ch.fontSize = 14;

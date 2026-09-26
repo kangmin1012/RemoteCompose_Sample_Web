@@ -9,7 +9,7 @@
     {
       "type": "text",
       "id": "2",
-      "text": "Feature Showcase",
+      "text": "주요 기능 살펴보기",
       "color": "#1A1A2E",
       "fontSize": 26
     },
@@ -21,7 +21,7 @@
     {
       "type": "text",
       "id": "3",
-      "text": "Everything below is server-driven",
+      "text": "아래 화면은 모두 서버에서 구성합니다.",
       "color": "#6B7280",
       "fontSize": 13
     },
@@ -43,7 +43,7 @@
         {
           "type": "text",
           "id": "5a",
-          "text": "Remote Layouts",
+          "text": "서버에서 구성하는 화면",
           "color": "#6200EA",
           "fontSize": 16
         },
@@ -55,7 +55,7 @@
         {
           "type": "text",
           "id": "5b",
-          "text": "Text, buttons, cards, rows, spacers, dividers \u2014 all rendered natively via Remote Compose.",
+          "text": "텍스트, 버튼, 카드, 가로 배치, 여백, 구분선을 리모트 컴포즈로 앱에서 그립니다.",
           "color": "#6B7280",
           "fontSize": 12
         }
@@ -79,7 +79,7 @@
         {
           "type": "text",
           "id": "7a",
-          "text": "Click Actions",
+          "text": "클릭 액션",
           "color": "#00897B",
           "fontSize": 16
         },
@@ -91,7 +91,7 @@
         {
           "type": "text",
           "id": "7b",
-          "text": "Buttons fire HostAction events. The app handles them \u2014 toasts, navigation, or custom logic.",
+          "text": "버튼을 누르면 앱에서 이벤트를 받아 메시지 표시나 화면 이동 등을 처리합니다.",
           "color": "#6B7280",
           "fontSize": 12
         }
@@ -116,7 +116,7 @@
         {
           "type": "text",
           "id": "9a",
-          "text": "Clickable Cards",
+          "text": "클릭할 수 있는 카드",
           "color": "#C62828",
           "fontSize": 16
         },
@@ -128,7 +128,7 @@
         {
           "type": "text",
           "id": "9b",
-          "text": "Tap this card. The entire surface is a click target, not just a button.",
+          "text": "카드를 눌러 보세요. 카드 전체 영역이 클릭에 반응합니다.",
           "color": "#6B7280",
           "fontSize": 12
         }
@@ -157,7 +157,7 @@
         {
           "type": "button",
           "id": "13a",
-          "text": "Toast",
+          "text": "메시지",
           "color": "#6200EA",
           "textColor": "#FFFFFF",
           "fontSize": 13,
@@ -167,7 +167,7 @@
         {
           "type": "button",
           "id": "13c",
-          "text": "Alert",
+          "text": "알림",
           "color": "#C62828",
           "textColor": "#FFFFFF",
           "fontSize": 13,
@@ -184,7 +184,7 @@
     {
       "type": "text",
       "id": "15",
-      "text": "No app update required.",
+      "text": "앱을 업데이트할 필요가 없습니다.",
       "color": "#9CA3AF",
       "fontSize": 11
     }
