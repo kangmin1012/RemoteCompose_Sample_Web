@@ -26,9 +26,15 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material3)
                 implementation(compose.ui)
+                implementation(compose.components.resources)
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
             }
         }
     }
+}
+
+compose.resources {
+    generateResClass = always
+    packageOfResClass = "com.example.preview.resources"
 }

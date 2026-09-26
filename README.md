@@ -37,6 +37,8 @@ cd preview-src
 
 미리보기 소스를 수정한 경우 `preview-src/build/dist/wasmJs/productionExecutable/`의 결과물을 `preview/`에 반영하세요. 일반 JSON 편집에는 미리보기를 다시 빌드할 필요가 없습니다.
 
+미리보기는 Canvas로 글자를 그리므로 편집기 페이지의 CSS 글꼴을 상속하지 않습니다. 한글 표시를 위해 나눔고딕 Regular·Bold를 `preview-src/src/wasmJsMain/composeResources/files/fonts/`에 포함하고, 두 글꼴이 준비된 후 화면을 그립니다. 배포 시 `composeResources/` 폴더도 함께 복사해야 합니다. 글꼴과 SIL Open Font License 원문은 [Google Fonts](https://github.com/google/fonts/tree/main/ofl/nanumgothic)에서 가져왔으며, 라이선스는 글꼴 폴더의 `OFL.txt`에 포함되어 있습니다.
+
 ## 코드 안내
 
 - `index.html`, `assets/editor.css`: 화면 구조와 스타일.
