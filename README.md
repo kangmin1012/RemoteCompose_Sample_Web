@@ -55,4 +55,4 @@ Editor의 Deploy에는 대상 저장소에 **Contents: Read and write**, **Actio
 
 ## 참고 코드
 
-[armcha/remotecompose](https://github.com/armcha/remotecompose), 기준 커밋 `b80e896840e74cc33d18d65bb382931eddc1e3fd`의 Editor·변환기·미리보기·예제를 기반으로 합니다. 동작을 보존하면서 HTML/CSS/JS와 기본 데이터를 분리하고 포맷을 정리했습니다. Reset이 없는 화면을 참조하던 오류를 수정했으며, 배포 대상을 이 저장소로 변경했습니다. Remote Compose 버전은 앱과 동일한 `1.0.0-alpha05`입니다.
+[armcha/remotecompose](https://github.com/armcha/remotecompose), 기준 커밋 `b80e896840e74cc33d18d65bb382931eddc1e3fd`의 Editor·변환기·미리보기·예제를 기반으로 합니다. 동작을 보존하면서 HTML/CSS/JS와 기본 데이터를 분리하고 포맷을 정리했습니다. Reset이 없는 화면을 참조하던 오류를 수정했으며, 배포 대상을 이 저장소로 변경했습니다. Remote Compose 버전은 앱과 동일한 `1.0.0-alpha20`입니다.

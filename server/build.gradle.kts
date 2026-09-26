@@ -9,9 +9,9 @@ application {
 }
 
 dependencies {
-    implementation("androidx.compose.remote:remote-core:1.0.0-alpha05")
-    implementation("androidx.compose.remote:remote-creation:1.0.0-alpha05")
-    implementation("androidx.compose.remote:remote-creation-core:1.0.0-alpha05")
+    implementation("androidx.compose.remote:remote-core:1.0.0-alpha20")
+    implementation("androidx.compose.remote:remote-creation:1.0.0-alpha20")
+    implementation("androidx.compose.remote:remote-creation-core:1.0.0-alpha20")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     // Shared models are inlined since the shared library doesn't have a JVM target yet
     implementation("androidx.annotation:annotation:1.9.1")
