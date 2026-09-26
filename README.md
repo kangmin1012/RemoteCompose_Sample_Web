@@ -20,8 +20,11 @@ Text, Button, Spacer, Divider, Card, Row와 중첩 요소, 색상·간격·테�
 
 ```sh
 node scripts/serve.mjs       # http://localhost:8080
-node --test tests/editor.test.mjs
+npm ci                      # 테스트용 DOM 환경 설치
+npm test
 ```
+
+에디터 액션 점검 범위와 수정한 오류는 [점검 기록](docs/editor-action-audit.md)에 정리했습니다. DOM 테스트는 실제로 생성한 버튼의 클릭 핸들러, 중첩 편집, 드래그 이벤트, 화면 전환과 비동기 배포 처리를 검증합니다. GitHub 요청은 테스트 응답으로 대체하므로 토큰이나 원격 저장소 변경이 필요하지 않습니다.
 
 바이너리 변환과 미리보기 소스 빌드에는 JDK 21이 필요합니다.
 

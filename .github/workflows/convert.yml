@@ -23,7 +23,9 @@ jobs:
         with:
           node-version: "22"
       - name: Test editor behavior
-        run: node --test tests/editor.test.mjs
+        run: |
+          npm ci
+          npm test
       - uses: actions/setup-java@v4
         with:
           java-version: "21"

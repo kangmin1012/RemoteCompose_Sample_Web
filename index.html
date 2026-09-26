@@ -13,7 +13,7 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="assets/editor.css?v=ko-1" />
+    <link rel="stylesheet" href="assets/editor.css?v=actions-2" />
   </head>
   <body>
     <header>
@@ -74,7 +74,7 @@
         <button class="btn btn-o" onclick="copyJson()">
           <span class="material-icons-round">content_copy</span>JSON 복사
         </button>
-        <button class="btn btn-p" onclick="deployConfig()">
+        <button class="btn btn-p" id="deployButton" onclick="deployConfig()">
           <span class="material-icons-round">cloud_upload</span>배포
         </button>
       </div>
@@ -133,7 +133,7 @@
               type="color"
               id="bgColor"
               value="#F5F0FF"
-              oninput="updatePreview()"
+              oninput="onBackgroundChange()"
             /><code id="bgColorCode">#F5F0FF</code>
           </div>
         </div>
@@ -156,7 +156,7 @@
                 id="composePreview"
                 title="Remote Compose 실시간 미리보기"
                 src="preview/index.html?v=korean-fonts-1"
-                onload="onPreviewLoad()"
+                onload="window.onPreviewLoad?.()"
                 style="
                   width: 100%;
                   height: 100%;
@@ -175,6 +175,6 @@
     </div>
 
     <script src="assets/sample-data.js?v=ko-layout-1"></script>
-    <script src="assets/editor.js?v=ko-layout-1"></script>
+    <script src="assets/editor.js?v=actions-2"></script>
   </body>
 </html>

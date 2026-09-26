@@ -32,67 +32,79 @@ const screens = {
 };
 let activeScreen = "home";
 let elements = [],
-  dragIdx = null,
-  nextId = 1,
-  expandedIdx = -1,
-  expandedChildId = null,
-  expandedGcId = null;
+  nextId = 1;
+let expandedIds = [],
+  dragPath = null;
+const usedIds = new Set();
+const defaultBackgrounds = { home: "#F5F0FF", detail: "#F0F4F8" };
+Object.values(screens).forEach((s) => {
+  s.revision = 0;
+});
 function uid() {
-  return String(nextId++);
+  while (usedIds.has(String(nextId))) nextId++;
+  const id = String(nextId++);
+  usedIds.add(id);
+  return id;
 }
 function currentFile() {
   return screens[activeScreen].file;
 }
 function init() {
-  const t = localStorage.getItem("gh_token");
-  if (t) document.getElementById("ghToken").value = t;
+  try {
+    const token = localStorage.getItem("gh_token");
+    if (token) document.getElementById("ghToken").value = token;
+  } catch {
+    /* Editing also works when browser storage is unavailable. */
+  }
   updateVersionLabel();
+  onPreviewLoad();
   fetchScreen("home");
   fetchScreen("detail");
 }
-const BUILD_VERSION = 84;
+const BUILD_VERSION = 85;
 function updateVersionLabel() {
   document.getElementById("versionLabel").textContent =
     "0.0." + BUILD_VERSION + "-alpha";
 }
 async function fetchScreen(key) {
-  const s = screens[key];
+  const s = screens[key],
+    revision = s.revision;
   try {
     const r = await fetch(s.file + "?" + Date.now());
-    if (r.ok) {
-      const c = await r.json();
-      s.bg = c.backgroundColor || s.bg;
-      if (c.scrollable != null) s.scrollable = c.scrollable;
-      if (c.padding != null) s.padding = c.padding;
-      s.elements = (c.elements || []).map((e) => assignIds(e));
-      nextId = Math.max(nextId, maxId(s.elements) + 1);
-    } else {
-      loadScreenDefs(key);
-    }
+    if (!r.ok) throw new Error("Config unavailable");
+    const c = await r.json();
+    // A late initial response must not replace edits or a Reset.
+    if (s.revision !== revision) return;
+    nextId = Math.max(nextId, maxId(c.elements || []) + 1);
+    s.bg = c.backgroundColor || defaultBackgrounds[key];
+    s.scrollable = c.scrollable ?? false;
+    s.padding = c.padding ?? null;
+    s.elements = (c.elements || []).map(assignIds);
   } catch {
+    if (s.revision !== revision) return;
     loadScreenDefs(key);
   }
   if (key === activeScreen) activateScreen();
 }
 function loadScreenDefs(key) {
-  const m = { home: defaultsHome, detail: defaultsDetail };
-  const defs = m[key] || [];
-  screens[key].elements = defs.map((e) =>
-    assignIds(JSON.parse(JSON.stringify(e))),
-  );
+  const defs = { home: defaultsHome, detail: defaultsDetail }[key];
+  Object.assign(screens[key], {
+    elements: JSON.parse(JSON.stringify(defs)).map(assignIds),
+    bg: defaultBackgrounds[key],
+    scrollable: false,
+    padding: null,
+  });
 }
 function activateScreen() {
   const s = screens[activeScreen];
   elements = s.elements;
   document.getElementById("bgColor").value = s.bg;
-  document.getElementById("bgColorCode").textContent = s.bg.toUpperCase();
-  expandedIdx = -1;
-  expandedChildId = null;
-  expandedGcId = null;
+  expandedIds = [];
+  dragPath = null;
   render();
 }
 function switchScreen(key) {
-  if (key === activeScreen) return;
+  if (key === activeScreen || !screens[key]) return;
   screens[activeScreen].elements = elements;
   screens[activeScreen].bg = document.getElementById("bgColor").value;
   activeScreen = key;
@@ -102,547 +114,326 @@ function switchScreen(key) {
   document.getElementById("tab-" + key).classList.add("active");
   activateScreen();
 }
-function assignIds(e) {
-  e = { ...e, id: e.id || uid() };
-  if (e.children) e.children = e.children.map((c) => assignIds({ ...c }));
+function assignIds(el) {
+  const id = el.id == null ? null : String(el.id);
+  const e = { ...el, id: id && !usedIds.has(id) ? id : uid() };
+  usedIds.add(e.id);
+  if (e.children) e.children = e.children.map(assignIds);
   return e;
 }
 function maxId(els) {
-  let m = 0;
-  els.forEach((e) => {
-    m = Math.max(m, parseInt(e.id) || 0);
-    if (e.children) m = Math.max(m, maxId(e.children));
-  });
-  return m;
+  return els.reduce(
+    (m, e) => Math.max(m, parseInt(e.id) || 0, maxId(e.children || [])),
+    0,
+  );
+}
+function markEdited() {
+  screens[activeScreen].revision++;
 }
 function resetToDefaults() {
   nextId = 1;
-  Object.keys(screens).forEach(loadScreenDefs);
+  usedIds.clear();
+  Object.keys(screens).forEach((key) => {
+    screens[key].revision++;
+    loadScreenDefs(key);
+  });
   activateScreen();
   showToast("기본 구성으로 초기화했습니다", "restart_alt");
 }
-function addElement(type) {
+function createElement(type, nested = false) {
   const el = { type, id: uid() };
-  if (type === "text") {
-    el.text = "새 텍스트";
-    el.color = "#000000";
-    el.fontSize = 16;
-  } else if (type === "button") {
-    el.text = "버튼";
-    el.color = "#6200EA";
-    el.textColor = "#FFFFFF";
-    el.fontSize = 16;
-    el.cornerRadius = 24;
-    el.actionName = "btn_" + el.id;
-  } else if (type === "spacer") {
-    el.height = 16;
-  } else if (type === "divider") {
-    el.color = "#CCCCCC";
-    el.height = 1;
-  } else if (type === "card") {
-    el.color = "#FFFFFF";
-    el.cornerRadius = 16;
-    el.paddingH = 16;
-    el.paddingV = 16;
+  if (type === "text")
+    Object.assign(el, {
+      text: "새 텍스트",
+      color: nested ? "#333333" : "#000000",
+      fontSize: nested ? 14 : 16,
+    });
+  if (type === "button")
+    Object.assign(el, {
+      text: "버튼",
+      color: "#6200EA",
+      textColor: "#FFFFFF",
+      fontSize: nested ? 14 : 16,
+      cornerRadius: nested ? 20 : 24,
+    });
+  if (type === "button" && !nested) el.actionName = "btn_" + el.id;
+  if (type === "spacer") el.height = 16;
+  if (type === "hspacer") el.width = 16;
+  if (type === "divider") Object.assign(el, { color: "#CCCCCC", height: 1 });
+  if (type === "card") {
+    Object.assign(el, {
+      color: "#FFFFFF",
+      cornerRadius: nested ? 0 : 16,
+      paddingH: nested ? 14 : 16,
+      paddingV: nested ? 10 : 16,
+      children: [],
+    });
+    if (!nested)
+      el.children.push({ ...createElement("text", true), text: "카드 내용" });
+  }
+  if (type === "row")
     el.children = [
-      {
-        type: "text",
-        id: uid(),
-        text: "카드 내용",
-        color: "#333333",
-        fontSize: 14,
-      },
+      { ...createElement("button", true), text: "왼쪽" },
+      { ...createElement("button", true), text: "오른쪽", color: "#00897B" },
     ];
-  } else if (type === "row") {
-    el.children = [
-      {
-        type: "button",
-        id: uid(),
-        text: "왼쪽",
-        color: "#6200EA",
-        textColor: "#FFFFFF",
-        fontSize: 14,
-        cornerRadius: 20,
-      },
-      {
-        type: "button",
-        id: uid(),
-        text: "오른쪽",
-        color: "#00897B",
-        textColor: "#FFFFFF",
-        fontSize: 14,
-        cornerRadius: 20,
-      },
-    ];
-  }
-  elements.push(el);
-  render();
+  return el;
 }
-function removeElement(idx) {
-  if (expandedIdx === idx) expandedIdx = -1;
-  else if (expandedIdx > idx) expandedIdx--;
-  elements.splice(idx, 1);
-  render();
-}
-function toggleExpand(idx) {
-  expandedIdx = expandedIdx === idx ? -1 : idx;
-  const cards = document.querySelectorAll(".el-card");
-  cards.forEach((c, i) => {
-    if (i === expandedIdx) c.classList.add("expanded");
-    else c.classList.remove("expanded");
-  });
-}
-function onFieldChange(idx, field, value) {
-  if (
-    field === "fontSize" ||
-    field === "height" ||
-    field === "width" ||
-    field === "cornerRadius" ||
-    field === "borderWidth" ||
-    field === "paddingH" ||
-    field === "paddingV"
-  )
-    value = parseInt(value) || 0;
-  elements[idx][field] = value;
-  updatePreview();
-}
-function onChildField(parentIdx, childIdx, field, value) {
-  if (
-    field === "fontSize" ||
-    field === "cornerRadius" ||
-    field === "height" ||
-    field === "width" ||
-    field === "borderWidth" ||
-    field === "paddingH" ||
-    field === "paddingV"
-  )
-    value = parseInt(value) || 0;
-  elements[parentIdx].children[childIdx][field] = value;
-  updatePreview();
-}
-function onGrandchildField(parentIdx, childIdx, gcIdx, field, value) {
-  if (
-    field === "fontSize" ||
-    field === "cornerRadius" ||
-    field === "height" ||
-    field === "width" ||
-    field === "borderWidth" ||
-    field === "paddingH" ||
-    field === "paddingV"
-  )
-    value = parseInt(value) || 0;
-  elements[parentIdx].children[childIdx].children[gcIdx][field] = value;
-  updatePreview();
-}
-function removeGrandchild(pi, ci, gi) {
-  elements[pi].children[ci].children.splice(gi, 1);
-  render();
-}
-function toggleGcExpand(pi, ci, gi) {
-  const id = "gc-" + pi + "-" + ci + "-" + gi;
-  const el = document.getElementById(id);
-  if (!el) return;
-  const was = el.classList.contains("child-expanded");
-  document
-    .querySelectorAll(".child-item .child-item")
-    .forEach((c) => c.classList.remove("child-expanded"));
-  if (!was) {
-    el.classList.add("child-expanded");
-    expandedGcId = id;
-  } else {
-    expandedGcId = null;
-  }
-}
-function buildGcEditor(gc, i, ci, gi) {
-  const f = (field, val) =>
-    `onGrandchildField(${i},${ci},${gi},'${field}',this.value)`;
-  let html = "";
-  if (gc.type === "text") {
-    html += `<div class="field"><label>텍스트</label><input type="text" value="${esc(gc.text || "")}" oninput="${f("text")}"></div>
-        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${gc.fontSize || 14}" oninput="${f("fontSize")}"></div>
-        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${gc.color || "#000000"}" oninput="${f("color")}"><code>${(gc.color || "#000000").toUpperCase()}</code></div></div></div>
-        <div class="fr"><div class="field"><label>좌우 안쪽 여백</label><input type="number" min="0" max="50" value="${gc.paddingH || 0}" oninput="${f("paddingH")}"></div>
-        <div class="field"><label>상하 안쪽 여백</label><input type="number" min="0" max="50" value="${gc.paddingV || 0}" oninput="${f("paddingV")}"></div></div>`;
-  } else if (gc.type === "button") {
-    html += `<div class="field"><label>버튼 문구</label><input type="text" value="${esc(gc.text || "")}" oninput="${f("text")}"></div>
-        <div class="field"><label>액션</label><input type="text" value="${esc(gc.actionName || "")}" oninput="${f("actionName")}" placeholder="예: navigate:detail"></div>
-        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${gc.fontSize || 14}" oninput="${f("fontSize")}"></div>
-        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${gc.cornerRadius || 20}" oninput="${f("cornerRadius")}"></div></div>
-        <div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${gc.color || "#6200EA"}" oninput="${f("color")}"><code>${(gc.color || "#6200EA").toUpperCase()}</code></div></div>
-        <div class="field"><label>글자 색상</label><div class="cf"><input type="color" value="${gc.textColor || "#FFFFFF"}" oninput="${f("textColor")}"><code>${(gc.textColor || "#FFFFFF").toUpperCase()}</code></div></div></div>
-        <div class="fr"><div class="field"><label>테두리 색상</label><div class="cf"><input type="color" value="${gc.borderColor || "#000000"}" oninput="${f("borderColor")}"><code>${(gc.borderColor || "").toUpperCase() || "없음"}</code></div></div>
-        <div class="field"><label>테두리 두께</label><input type="number" min="0" max="10" value="${gc.borderWidth || 0}" oninput="${f("borderWidth")}"></div></div>`;
-  } else if (gc.type === "spacer") {
-    html += `<div class="field"><label>높이 (dp)</label><input type="number" min="1" max="200" value="${gc.height || 16}" oninput="${f("height")}"></div>`;
-  } else if (gc.type === "hspacer") {
-    html += `<div class="field"><label>너비 (dp)</label><input type="number" min="1" max="200" value="${gc.width || 16}" oninput="${f("width")}"></div>`;
-  } else if (gc.type === "divider") {
-    html += `<div class="fr"><div class="field"><label>높이</label><input type="number" min="1" max="10" value="${gc.height || 1}" oninput="${f("height")}"></div>
-        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${gc.color || "#CCCCCC"}" oninput="${f("color")}"><code>${(gc.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
-  } else if (gc.type === "card") {
-    html += `<div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${gc.color || "#FFFFFF"}" oninput="${f("color")}"><code>${(gc.color || "#FFFFFF").toUpperCase()}</code></div></div>
-        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${gc.cornerRadius || 0}" oninput="${f("cornerRadius")}"></div></div>
-        <div class="fr"><div class="field"><label>좌우 안쪽 여백</label><input type="number" min="0" max="50" value="${gc.paddingH || 0}" oninput="${f("paddingH")}"></div>
-        <div class="field"><label>상하 안쪽 여백</label><input type="number" min="0" max="50" value="${gc.paddingV || 0}" oninput="${f("paddingV")}"></div></div>`;
-  }
-  return (
-    html ||
-    '<div style="font-size:11px;color:#999">편집 가능한 속성이 없습니다</div>'
+function elementAt(path) {
+  return path.reduce(
+    (list, index, depth) =>
+      depth === path.length - 1 ? list[index] : list[index].children,
+    elements,
   );
 }
-function addChild(parentIdx, type) {
-  const ch = { type, id: uid() };
-  if (type === "text") {
-    ch.text = "새 텍스트";
-    ch.color = "#333333";
-    ch.fontSize = 14;
-  } else if (type === "button") {
-    ch.text = "버튼";
-    ch.color = "#6200EA";
-    ch.textColor = "#FFFFFF";
-    ch.fontSize = 14;
-    ch.cornerRadius = 20;
-  } else if (type === "spacer") {
-    ch.height = 16;
-  } else if (type === "hspacer") {
-    ch.width = 16;
-  } else if (type === "divider") {
-    ch.color = "#CCCCCC";
-    ch.height = 1;
-  } else if (type === "card") {
-    ch.color = "#FFFFFF";
-    ch.cornerRadius = 0;
-    ch.paddingH = 14;
-    ch.paddingV = 10;
-    ch.children = [];
+function siblingsAt(path) {
+  return path.length === 1 ? elements : elementAt(path.slice(0, -1)).children;
+}
+function addElement(type) {
+  elements.push(createElement(type));
+  markEdited();
+  render();
+}
+function addNestedElement(path, type) {
+  const parent = elementAt(path);
+  (parent.children ||= []).push(createElement(type, true));
+  markEdited();
+  render();
+}
+function deleteEditorElement(path) {
+  siblingsAt(path).splice(path.at(-1), 1);
+  markEdited();
+  render();
+}
+function toggleEditorElement(path) {
+  const el = elementAt(path),
+    depth = path.length - 1;
+  const wasExpanded = expandedIds[depth] === el.id;
+  expandedIds.length = depth;
+  if (!wasExpanded) expandedIds.push(el.id);
+  syncExpanded();
+}
+function syncExpanded() {
+  document.querySelectorAll("[data-element-id]").forEach((node) => {
+    const open = expandedIds.includes(node.dataset.elementId);
+    node.classList.toggle(
+      node.classList.contains("el-card") ? "expanded" : "child-expanded",
+      open,
+    );
+    node
+      .querySelector("[aria-expanded]")
+      ?.setAttribute("aria-expanded", String(open));
+    node.querySelector(".el-editor,.child-editor").hidden = !open;
+  });
+}
+function onEditorKey(event, path) {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleEditorElement(path);
   }
-  if (!elements[parentIdx].children) elements[parentIdx].children = [];
-  elements[parentIdx].children.push(ch);
-  render();
 }
-function removeChild(parentIdx, childIdx) {
-  elements[parentIdx].children.splice(childIdx, 1);
-  render();
+const numberFields = new Set([
+  "fontSize",
+  "height",
+  "width",
+  "cornerRadius",
+  "borderWidth",
+  "paddingH",
+  "paddingV",
+]);
+function onElementField(path, field, input) {
+  const el = elementAt(path);
+  el[field] = numberFields.has(field)
+    ? parseInt(input.value, 10) || 0
+    : input.value;
+  if (field === "borderWidth" && el.borderWidth > 0 && !el.borderColor) {
+    el.borderColor = el.type === "card" ? "#CCCCCC" : "#000000";
+  }
+  const node = input.closest("[data-element-id]");
+  const summary = node?.querySelector(
+    path.length === 1 ? ".el-summary" : ".child-summary",
+  );
+  if (summary) summary.textContent = elementSummary(el);
+  node?.querySelectorAll('input[type="color"]').forEach((color) => {
+    if (color.closest("[data-element-id]") !== node) return;
+    color.nextElementSibling.textContent =
+      color.dataset.field === "borderColor" && !el.borderColor
+        ? "없음"
+        : (el[color.dataset.field] || color.value).toUpperCase();
+  });
+  markEdited();
+  updatePreview();
 }
-
-let childDragInfo = null;
-function onDragStart(e, idx) {
-  dragIdx = idx;
-  childDragInfo = null;
-  e.dataTransfer.effectAllowed = "move";
-  e.currentTarget.classList.add("dragging");
+function onBackgroundChange() {
+  markEdited();
+  updatePreview();
 }
-function onDragEnd() {
-  dragIdx = null;
-  document
-    .querySelectorAll(".el-card")
-    .forEach((c) => c.classList.remove("dragging", "drag-over"));
-}
-function onDragOver(e, idx) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = "move";
-  document
-    .querySelectorAll(".el-card")
-    .forEach((c) => c.classList.remove("drag-over"));
-  e.currentTarget.closest(".el-card")?.classList.add("drag-over");
-}
-function onDrop(e, idx) {
-  e.preventDefault();
-  if (dragIdx === null || dragIdx === idx) return;
-  const m = elements.splice(dragIdx, 1)[0];
-  elements.splice(idx, 0, m);
-  dragIdx = null;
-  render();
-}
-
-function onChildDragStart(e, pi, ci) {
-  e.stopPropagation();
-  e.stopImmediatePropagation();
-  childDragInfo = { type: "child", pi, ci };
-  dragIdx = null;
-  e.dataTransfer.effectAllowed = "move";
-  e.dataTransfer.setDragImage(e.currentTarget, 0, 0);
-  e.currentTarget.classList.add("dragging");
-}
-function onChildDragEnd(e) {
-  childDragInfo = null;
-  document
-    .querySelectorAll(".child-item")
-    .forEach((c) => c.classList.remove("dragging", "drag-over"));
-}
-function onChildDragOver(e, pi, ci) {
-  e.preventDefault();
-  e.stopPropagation();
-  e.dataTransfer.dropEffect = "move";
-  document
-    .querySelectorAll(".child-item")
-    .forEach((c) => c.classList.remove("drag-over"));
-  e.currentTarget.closest(".child-item")?.classList.add("drag-over");
-}
-function onChildDrop(e, pi, ci) {
-  e.preventDefault();
-  e.stopPropagation();
-  if (
-    !childDragInfo ||
-    childDragInfo.type !== "child" ||
-    childDragInfo.pi !== pi ||
-    childDragInfo.ci === ci
-  )
+function onEditorDragStart(event, path) {
+  event.stopPropagation();
+  // Inputs/buttons must remain editable inside draggable containers.
+  if (event.target.closest("input,button")) {
+    event.preventDefault();
     return;
-  const arr = elements[pi].children;
-  const m = arr.splice(childDragInfo.ci, 1)[0];
-  arr.splice(ci, 0, m);
-  childDragInfo = null;
-  render();
+  }
+  dragPath = path;
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", elementAt(path).id);
+  event.currentTarget.classList.add("dragging");
 }
-
-function onGcDragStart(e, pi, ci, gi) {
-  e.stopPropagation();
-  e.stopImmediatePropagation();
-  childDragInfo = { type: "gc", pi, ci, gi };
-  dragIdx = null;
-  e.dataTransfer.effectAllowed = "move";
-  e.dataTransfer.setDragImage(e.currentTarget, 0, 0);
-  e.currentTarget.classList.add("dragging");
+function sameParent(a, b) {
+  return (
+    a && a.length === b.length && a.slice(0, -1).every((x, i) => x === b[i])
+  );
 }
-function onGcDragOver(e, pi, ci, gi) {
-  e.preventDefault();
-  e.stopPropagation();
-  e.dataTransfer.dropEffect = "move";
+function onEditorDragOver(event, path) {
+  event.stopPropagation();
+  if (!sameParent(dragPath, path)) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
   document
-    .querySelectorAll(".child-item .child-item")
-    .forEach((c) => c.classList.remove("drag-over"));
-  e.currentTarget.closest(".child-item")?.classList.add("drag-over");
+    .querySelectorAll(".drag-over")
+    .forEach((n) => n.classList.remove("drag-over"));
+  event.currentTarget.classList.add("drag-over");
 }
-function onGcDrop(e, pi, ci, gi) {
-  e.preventDefault();
-  e.stopPropagation();
-  if (
-    !childDragInfo ||
-    childDragInfo.type !== "gc" ||
-    childDragInfo.pi !== pi ||
-    childDragInfo.ci !== ci ||
-    childDragInfo.gi === gi
-  )
-    return;
-  const arr = elements[pi].children[ci].children;
-  const m = arr.splice(childDragInfo.gi, 1)[0];
-  arr.splice(gi, 0, m);
-  childDragInfo = null;
-  render();
+function onEditorDrop(event, path) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (sameParent(dragPath, path) && dragPath.at(-1) !== path.at(-1)) {
+    const list = siblingsAt(path);
+    list.splice(path.at(-1), 0, list.splice(dragPath.at(-1), 1)[0]);
+    markEdited();
+    render();
+  }
+  onEditorDragEnd(event);
 }
-
+function onEditorDragEnd(event) {
+  event.stopPropagation();
+  dragPath = null;
+  document
+    .querySelectorAll(".dragging,.drag-over")
+    .forEach((n) => n.classList.remove("dragging", "drag-over"));
+}
+function elementSummary(el) {
+  if (el.type === "card")
+    return (
+      (el.children?.length || 0) +
+      "개 하위 요소" +
+      (el.actionName ? " (클릭 가능)" : "")
+    );
+  if (el.type === "row") return (el.children?.length || 0) + "개 항목";
+  if (el.type === "spacer") return (el.height ?? 16) + "dp";
+  if (el.type === "hspacer") return (el.width ?? 16) + "dp 너비";
+  return el.text || elementLabels[el.type] || el.type;
+}
 function render() {
-  const list = document.getElementById("elementList");
   document.getElementById("elCount").textContent =
     "요소 " + elements.length + "개";
-  if (!elements.length) {
-    list.innerHTML =
-      '<div class="empty-state"><span class="material-icons-round">add_circle_outline</span><p>아직 요소가 없습니다. 위에서 추가해 보세요.</p></div>';
-    updatePreview();
-    return;
-  }
-  list.innerHTML = elements
-    .map((el, i) => {
-      const badge = `<span class="badge ${el.type}">${elementLabels[el.type] || el.type}</span>`;
-      let summary = "";
-      if (el.type === "text") summary = el.text || "내용 없음";
-      else if (el.type === "button") summary = el.text || "버튼";
-      else if (el.type === "spacer") summary = (el.height || 16) + "dp";
-      else if (el.type === "hspacer") summary = (el.width || 16) + "dp 너비";
-      else if (el.type === "divider") summary = "구분선";
-      else if (el.type === "card")
-        summary =
-          (el.children?.length || 0) +
-          "개 하위 요소" +
-          (el.actionName ? " (클릭 가능)" : "");
-      else if (el.type === "row")
-        summary = (el.children?.length || 0) + "개 항목";
-      else if (el.type === "icon") summary = el.text || "아이콘";
-      let editor = buildEditor(el, i);
-      return `<div class="el-card" draggable="true" ondragstart="onDragStart(event,${i})" ondragend="onDragEnd()" ondragover="onDragOver(event,${i})" ondrop="onDrop(event,${i})">
-            <div class="el-handle"><span class="material-icons-round">drag_indicator</span></div>
-            <div class="el-body">
-                <div class="el-top" role="button" tabindex="0" onclick="toggleExpand(${i})" style="cursor:pointer">${badge}<span class="el-summary">${esc(summary)}</span></div>
-                <div class="el-editor">${editor}</div>
-            </div>
-            <div class="el-actions"><button class="del" onclick="event.stopPropagation();removeElement(${i})" title="삭제"><span class="material-icons-round">close</span></button></div>
-        </div>`;
-    })
+  document.getElementById("elementList").innerHTML = elements
+    .map((el, i) => renderElement(el, [i]))
     .join("");
-  if (expandedIdx >= 0 && expandedIdx < elements.length) {
-    document
-      .querySelectorAll(".el-card")
-      [expandedIdx]?.classList.add("expanded");
-  }
-  if (expandedChildId) {
-    const ce = document.getElementById(expandedChildId);
-    if (ce) ce.classList.add("child-expanded");
-  }
-  if (expandedGcId) {
-    const ge = document.getElementById(expandedGcId);
-    if (ge) ge.classList.add("child-expanded");
-  }
+  syncExpanded();
   updatePreview();
 }
-
-function buildEditor(el, i) {
-  if (el.type === "text")
-    return `
-        <div class="field"><label>텍스트</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)"></div>
-        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${el.fontSize || 16}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
-        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${el.color || "#000000"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#000000").toUpperCase()}</code></div></div></div>
-        <div class="fr"><div class="field"><label>좌우 안쪽 여백</label><input type="number" min="0" max="50" value="${el.paddingH || 0}" oninput="onFieldChange(${i},'paddingH',this.value)"></div>
-        <div class="field"><label>상하 안쪽 여백</label><input type="number" min="0" max="50" value="${el.paddingV || 0}" oninput="onFieldChange(${i},'paddingV',this.value)"></div></div>`;
-  if (el.type === "button")
-    return `
-        <div class="field"><label>버튼 문구</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)"></div>
-        <div class="field"><label>액션 이름</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)" placeholder="예: open_settings"></div>
-        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${el.fontSize || 16}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
-        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${el.cornerRadius || 24}" oninput="onFieldChange(${i},'cornerRadius',this.value)"></div></div>
-        <div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${el.color || "#6200EA"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#6200EA").toUpperCase()}</code></div></div>
-        <div class="field"><label>글자 색상</label><div class="cf"><input type="color" value="${el.textColor || "#FFFFFF"}" oninput="onFieldChange(${i},'textColor',this.value)"><code>${(el.textColor || "#FFFFFF").toUpperCase()}</code></div></div>
-        <div class="field"><label>테두리 색상</label><div class="cf"><input type="color" value="${el.borderColor || "#000000"}" oninput="onFieldChange(${i},'borderColor',this.value)"><code>${(el.borderColor || "").toUpperCase() || "없음"}</code></div></div></div>
-        <div class="fr"><div class="field"><label>테두리 두께</label><input type="number" min="0" max="10" value="${el.borderWidth || 0}" oninput="onFieldChange(${i},'borderWidth',this.value)"></div></div>`;
-  if (el.type === "spacer")
-    return `<div class="field"><label>높이 (dp)</label><input type="number" min="1" max="200" value="${el.height || 16}" oninput="onFieldChange(${i},'height',this.value)"></div>`;
-  if (el.type === "divider")
-    return `<div class="fr"><div class="field"><label>높이</label><input type="number" min="1" max="10" value="${el.height || 1}" oninput="onFieldChange(${i},'height',this.value)"></div><div class="field"><label>색상</label><div class="cf"><input type="color" value="${el.color || "#CCCCCC"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
-  if (el.type === "card")
-    return `
-        <div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${el.color || "#FFFFFF"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#FFFFFF").toUpperCase()}</code></div></div>
-        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${el.cornerRadius || 16}" oninput="onFieldChange(${i},'cornerRadius',this.value)"></div></div>
-        <div class="fr"><div class="field"><label>테두리 색상</label><div class="cf"><input type="color" value="${el.borderColor || "#CCCCCC"}" oninput="onFieldChange(${i},'borderColor',this.value)"><code>${(el.borderColor || "").toUpperCase() || "없음"}</code></div></div>
-        <div class="field"><label>테두리 두께</label><input type="number" min="0" max="10" value="${el.borderWidth || 0}" oninput="onFieldChange(${i},'borderWidth',this.value)"></div></div>
-        <div class="field"><label>액션 (선택)</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)" placeholder="클릭 시 실행할 액션을 입력하세요"></div>
-        ${childrenEditor(el, i, "text")}`;
-  if (el.type === "row") return childrenEditor(el, i, "button");
-  if (el.type === "icon")
-    return `
-        <div class="field"><label>아이콘 이름</label><input type="text" value="${esc(el.text || "")}" oninput="onFieldChange(${i},'text',this.value)" placeholder="content_copy, more_vert"></div>
-        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="12" max="48" value="${el.fontSize || 24}" oninput="onFieldChange(${i},'fontSize',this.value)"></div>
-        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${el.color || "#333333"}" oninput="onFieldChange(${i},'color',this.value)"><code>${(el.color || "#333333").toUpperCase()}</code></div></div></div>
-        <div class="field"><label>액션</label><input type="text" value="${esc(el.actionName || "")}" oninput="onFieldChange(${i},'actionName',this.value)"></div>`;
-  return "";
+function renderElement(el, path) {
+  const root = path.length === 1,
+    p = JSON.stringify(path);
+  return `<div class="${root ? "el-card" : "child-item"}" data-element-id="${esc(el.id)}" style="${root ? "" : "display:flex;align-items:stretch"}" draggable="true" ondragstart="onEditorDragStart(event,${p})" ondragend="onEditorDragEnd(event)" ondragover="onEditorDragOver(event,${p})" ondrop="onEditorDrop(event,${p})">
+    ${root ? '<div class="el-handle"><span class="material-icons-round">drag_indicator</span></div>' : ""}
+    <div class="${root ? "el-body" : "child-body"}" style="flex:1;min-width:0">
+      <div class="${root ? "el-top" : "child-hdr"}" role="button" tabindex="0" aria-expanded="false" onclick="event.stopPropagation();toggleEditorElement(${p})" onkeydown="onEditorKey(event,${p})"><span class="badge ${esc(el.type)}">${esc(elementLabels[el.type] || el.type)}</span><span class="${root ? "el-summary" : "child-summary"}">${esc(elementSummary(el))}</span></div>
+      <div class="${root ? "el-editor" : "child-editor"}">${buildEditor(el, path)}</div>
+    </div>
+    <div class="${root ? "el-actions" : "child-actions"}"><button type="button" class="${root ? "del" : "child-del-btn"}" onclick="event.stopPropagation();deleteEditorElement(${p})" title="삭제" aria-label="${esc(elementLabels[el.type] || el.type)} 삭제"><span class="material-icons-round">close</span></button></div>
+  </div>`;
 }
-
-function childrenEditor(el, i, defaultChild) {
-  const children = el.children || [];
-  let html =
-    '<div class="children-area" onclick="event.stopPropagation()"><div class="child-label"><span>하위 요소 (' +
-    children.length +
-    ')</span><div style="display:flex;gap:4px">';
-  html +=
-    '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
-    i +
-    ",'text')\">텍스트</button>";
-  html +=
-    '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
-    i +
-    ",'button')\">버튼</button>";
-  html +=
-    '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
-    i +
-    ",'spacer')\">세로 여백</button>";
-  html +=
-    '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
-    i +
-    ",'hspacer')\">가로 여백</button>";
-  html +=
-    '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
-    i +
-    ",'divider')\">구분선</button>";
-  html +=
-    '<button class="btn btn-o btn-s" onclick="event.stopPropagation();addChild(' +
-    i +
-    ",'card')\">카드</button>";
-  html += "</div></div>";
-  children.forEach((ch, ci) => {
-    const summary = ch.text || elementLabels[ch.type] || ch.type;
-    html += `<div class="child-item" id="child-${i}-${ci}" style="display:flex;align-items:stretch" draggable="true" ondragstart="onChildDragStart(event,${i},${ci})" ondragend="onChildDragEnd(event)" ondragover="onChildDragOver(event,${i},${ci})" ondrop="onChildDrop(event,${i},${ci})">`;
-    html += `<div style="flex:1;min-width:0">`;
-    html += `<div class="child-hdr" role="button" tabindex="0" onclick="toggleChildExpand(${i},${ci})"><span class="badge ${ch.type}">${elementLabels[ch.type] || ch.type}</span><span class="child-summary">${esc(summary)}</span></div>`;
-    html += `<div class="child-editor">${buildChildEditor(ch, i, ci)}</div>`;
-    html += `</div>`;
-    html += `<button class="child-del-btn" onclick="event.stopPropagation();removeChild(${i},${ci})" title="삭제" style="align-self:flex-start;margin:6px 4px 0 0"><span class="material-icons-round" style="font-size:16px">close</span></button>`;
-    html += `</div>`;
-  });
-  html += "</div>";
-  return html;
-}
-
-function buildChildEditor(ch, i, ci) {
+function buildEditor(el, path) {
+  const p = JSON.stringify(path);
+  const field = (name, label, type, fallback, min, max) => {
+    const value = el[name] ?? fallback;
+    const input = `<input type="${type}" aria-label="${label}" data-field="${name}" value="${esc(value)}" ${min == null ? "" : `min="${min}" max="${max}"`} oninput="onElementField(${p},'${name}',this)">`;
+    return `<div class="field${type === "text" ? " field-wide" : ""}"><label>${label}</label>${type === "color" ? `<div class="cf">${input}<code>${el[name] ? esc(String(value).toUpperCase()) : name === "borderColor" ? "없음" : esc(String(value).toUpperCase())}</code></div>` : input}</div>`;
+  };
+  const color = (name, label, value) => field(name, label, "color", value);
+  const number = (name, label, value, min = 0, max = 50) =>
+    field(name, label, "number", value, min, max);
+  const text = (name, label) => field(name, label, "text", "");
   let html = "";
-  if (ch.type === "text") {
-    html += `<div class="field"><label>텍스트</label><input type="text" value="${esc(ch.text || "")}" oninput="onChildField(${i},${ci},'text',this.value)"></div>
-        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${ch.fontSize || 14}" oninput="onChildField(${i},${ci},'fontSize',this.value)"></div>
-        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${ch.color || "#000000"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#000000").toUpperCase()}</code></div></div></div>`;
-  } else if (ch.type === "button") {
-    html += `<div class="field"><label>버튼 문구</label><input type="text" value="${esc(ch.text || "")}" oninput="onChildField(${i},${ci},'text',this.value)"></div>
-        <div class="field"><label>액션</label><input type="text" value="${esc(ch.actionName || "")}" oninput="onChildField(${i},${ci},'actionName',this.value)" placeholder="예: navigate:detail"></div>
-        <div class="fr"><div class="field"><label>글자 크기</label><input type="number" min="8" max="72" value="${ch.fontSize || 14}" oninput="onChildField(${i},${ci},'fontSize',this.value)"></div>
-        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${ch.cornerRadius || 20}" oninput="onChildField(${i},${ci},'cornerRadius',this.value)"></div></div>
-        <div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${ch.color || "#6200EA"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#6200EA").toUpperCase()}</code></div></div>
-        <div class="field"><label>글자 색상</label><div class="cf"><input type="color" value="${ch.textColor || "#FFFFFF"}" oninput="onChildField(${i},${ci},'textColor',this.value)"><code>${(ch.textColor || "#FFFFFF").toUpperCase()}</code></div></div></div>`;
-  } else if (ch.type === "spacer") {
-    html += `<div class="field"><label>높이 (dp)</label><input type="number" min="1" max="200" value="${ch.height || 16}" oninput="onChildField(${i},${ci},'height',this.value)"></div>`;
-  } else if (ch.type === "hspacer") {
-    html += `<div class="field"><label>너비 (dp)</label><input type="number" min="1" max="200" value="${ch.width || 16}" oninput="onChildField(${i},${ci},'width',this.value)"></div>`;
-  } else if (ch.type === "divider") {
-    html += `<div class="fr"><div class="field"><label>높이</label><input type="number" min="1" max="10" value="${ch.height || 1}" oninput="onChildField(${i},${ci},'height',this.value)"></div>
-        <div class="field"><label>색상</label><div class="cf"><input type="color" value="${ch.color || "#CCCCCC"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#CCCCCC").toUpperCase()}</code></div></div></div>`;
-  } else if (ch.type === "card") {
-    html += `<div class="fr"><div class="field"><label>배경색</label><div class="cf"><input type="color" value="${ch.color || "#FFFFFF"}" oninput="onChildField(${i},${ci},'color',this.value)"><code>${(ch.color || "#FFFFFF").toUpperCase()}</code></div></div>
-        <div class="field"><label>모서리 반경</label><input type="number" min="0" max="50" value="${ch.cornerRadius || 0}" oninput="onChildField(${i},${ci},'cornerRadius',this.value)"></div></div>
-        <div class="fr"><div class="field"><label>좌우 안쪽 여백</label><input type="number" min="0" max="50" value="${ch.paddingH || 0}" oninput="onChildField(${i},${ci},'paddingH',this.value)"></div>
-        <div class="field"><label>상하 안쪽 여백</label><input type="number" min="0" max="50" value="${ch.paddingV || 0}" oninput="onChildField(${i},${ci},'paddingV',this.value)"></div></div>`;
-    if (ch.children && ch.children.length) {
-      html += `<div style="margin-top:8px;padding:8px;background:var(--surface);border:1px dashed var(--outline);border-radius:6px" onclick="event.stopPropagation()">`;
-      html += `<div style="font-size:10px;font-weight:600;color:var(--ts);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">중첩 요소 (${ch.children.length})</div>`;
-      ch.children.forEach((gc, gi) => {
-        const gcSummary =
-          gc.text ||
-          (elementLabels[gc.type] || gc.type) +
-            " " +
-            (gc.height ? gc.height + "dp" : "");
-        html += `<div class="child-item" id="gc-${i}-${ci}-${gi}" style="display:flex;align-items:stretch" draggable="true" ondragstart="onGcDragStart(event,${i},${ci},${gi})" ondragend="onChildDragEnd(event)" ondragover="onGcDragOver(event,${i},${ci},${gi})" ondrop="onGcDrop(event,${i},${ci},${gi})">`;
-        html += `<div style="flex:1;min-width:0">`;
-        html += `<div class="child-hdr" role="button" tabindex="0" onclick="event.stopPropagation();toggleGcExpand(${i},${ci},${gi})"><span class="badge ${gc.type}">${elementLabels[gc.type] || gc.type}</span><span class="child-summary">${esc(gcSummary)}</span></div>`;
-        html += `<div class="child-editor" onclick="event.stopPropagation()">${buildGcEditor(gc, i, ci, gi)}</div>`;
-        html += `</div>`;
-        html += `<button class="child-del-btn" onclick="event.stopPropagation();removeGrandchild(${i},${ci},${gi})" title="삭제" style="align-self:flex-start;margin:6px 4px 0 0"><span class="material-icons-round" style="font-size:16px">close</span></button>`;
-        html += `</div>`;
-      });
-      html += `</div>`;
-    }
+  if (["text", "button", "icon"].includes(el.type)) {
+    html += text(
+      "text",
+      el.type === "button"
+        ? "버튼 문구"
+        : el.type === "icon"
+          ? "아이콘 이름"
+          : "텍스트",
+    );
+    html += number(
+      "fontSize",
+      "글자 크기",
+      el.type === "icon" ? 24 : 16,
+      8,
+      72,
+    );
   }
-  return (
-    html ||
-    '<div style="font-size:11px;color:#999">편집 가능한 속성이 없습니다</div>'
+  if (["button", "card", "icon"].includes(el.type))
+    html += text("actionName", "액션");
+  if (["text", "button", "card", "icon", "divider"].includes(el.type)) {
+    html += color(
+      "color",
+      ["button", "card"].includes(el.type) ? "배경색" : "색상",
+      {
+        text: "#000000",
+        button: "#6200EA",
+        card: "#FFFFFF",
+        icon: "#333333",
+        divider: "#CCCCCC",
+      }[el.type],
+    );
+  }
+  if (el.type === "button") html += color("textColor", "글자 색상", "#FFFFFF");
+  if (["button", "card"].includes(el.type)) {
+    html += number(
+      "cornerRadius",
+      "모서리 반경",
+      el.type === "button" ? 24 : 16,
+    );
+    html += color(
+      "borderColor",
+      "테두리 색상",
+      el.type === "card" ? "#CCCCCC" : "#000000",
+    );
+    html += number("borderWidth", "테두리 두께", 0, 0, 10);
+  }
+  if (["text", "card", "button"].includes(el.type)) {
+    html += number(
+      "paddingH",
+      "좌우 안쪽 여백",
+      el.type === "card" ? 16 : el.type === "button" ? 32 : 0,
+    );
+    html += number(
+      "paddingV",
+      "상하 안쪽 여백",
+      el.type === "card" ? 16 : el.type === "button" ? 14 : 0,
+    );
+  }
+  if (el.type === "spacer") html += number("height", "높이 (dp)", 16, 1, 200);
+  if (el.type === "hspacer") html += number("width", "너비 (dp)", 16, 1, 200);
+  if (el.type === "divider") html += number("height", "높이", 1, 1, 10);
+  if (["card", "row"].includes(el.type)) html += childrenEditor(el, path);
+  return `<div class="editor-fields">${html || "<div>편집 가능한 속성이 없습니다</div>"}</div>`;
+}
+function childrenEditor(el, path) {
+  const children = el.children || [];
+  return `<div class="children-area"><div class="child-label"><span>하위 요소 (${children.length})</span><div>${["text", "button", "spacer", "hspacer", "divider", "card"].map((type) => `<button type="button" class="btn btn-o btn-s" onclick="event.stopPropagation();addNestedElement(${JSON.stringify(path)},'${type}')">${elementLabels[type]}</button>`).join("")}</div></div>${children.map((child, i) => renderElement(child, [...path, i])).join("")}</div>`;
+}
+function esc(value) {
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
   );
-}
-
-function toggleChildExpand(parentIdx, childIdx) {
-  const id = "child-" + parentIdx + "-" + childIdx;
-  const el = document.getElementById(id);
-  if (!el) return;
-  const wasExpanded = el.classList.contains("child-expanded");
-  document
-    .querySelectorAll(".child-item")
-    .forEach((c) => c.classList.remove("child-expanded"));
-  expandedGcId = null;
-  if (!wasExpanded) {
-    el.classList.add("child-expanded");
-    expandedChildId = id;
-  } else {
-    expandedChildId = null;
-  }
-}
-
-function esc(s) {
-  const d = document.createElement("div");
-  d.textContent = s;
-  return d.innerHTML;
 }
 
 function updatePreview() {
@@ -684,12 +475,12 @@ function cleanEl(el) {
   if (el.type === "text") {
     o.text = el.text;
     o.color = (el.color || "#000000").toUpperCase();
-    o.fontSize = el.fontSize || 16;
+    o.fontSize = el.fontSize ?? 16;
   } else if (el.type === "button") {
     o.text = el.text;
     o.color = (el.color || "#6200EA").toUpperCase();
     o.textColor = (el.textColor || "#FFFFFF").toUpperCase();
-    o.fontSize = el.fontSize || 16;
+    o.fontSize = el.fontSize ?? 16;
     o.cornerRadius = el.cornerRadius != null ? el.cornerRadius : 24;
     if (el.actionName) o.actionName = el.actionName;
     if (el.borderColor && el.borderWidth) {
@@ -697,12 +488,12 @@ function cleanEl(el) {
       o.borderWidth = el.borderWidth;
     }
   } else if (el.type === "spacer") {
-    o.height = el.height || 16;
+    o.height = el.height ?? 16;
   } else if (el.type === "hspacer") {
-    o.width = el.width || 16;
+    o.width = el.width ?? 16;
   } else if (el.type === "divider") {
     o.color = (el.color || "#CCCCCC").toUpperCase();
-    o.height = el.height || 1;
+    o.height = el.height ?? 1;
   } else if (el.type === "card") {
     o.color = (el.color || "#FFFFFF").toUpperCase();
     o.cornerRadius = el.cornerRadius != null ? el.cornerRadius : 16;
@@ -719,7 +510,7 @@ function cleanEl(el) {
   } else if (el.type === "icon") {
     o.text = el.text;
     o.color = (el.color || "#333333").toUpperCase();
-    o.fontSize = el.fontSize || 24;
+    o.fontSize = el.fontSize ?? 24;
     if (el.actionName) o.actionName = el.actionName;
   }
   return o;
@@ -728,174 +519,160 @@ function cleanEl(el) {
 async function copyJson() {
   const j = JSON.stringify(getConfig(), null, 2);
   try {
-    await navigator.clipboard.writeText(j);
+    try {
+      await navigator.clipboard.writeText(j);
+    } catch {
+      const t = document.createElement("textarea");
+      t.value = j;
+      document.body.appendChild(t);
+      try {
+        t.select();
+        if (!document.execCommand("copy"))
+          throw new Error("복사 권한을 확인해 주세요");
+      } finally {
+        t.remove();
+      }
+    }
+    showToast("JSON을 복사했습니다", "content_copy");
   } catch {
-    const t = document.createElement("textarea");
-    t.value = j;
-    document.body.appendChild(t);
-    t.select();
-    document.execCommand("copy");
-    document.body.removeChild(t);
+    showToast(
+      "JSON 복사에 실패했습니다. 브라우저의 클립보드 권한을 확인해 주세요",
+      "error",
+      true,
+    );
   }
-  showToast("JSON을 복사했습니다", "content_copy");
+}
+let deployBusy = false,
+  deployGeneration = 0;
+let deployTimer = null,
+  deployResetTimer = null,
+  deployStartTime = 0;
+async function responseError(response) {
+  try {
+    return (await response.json()).message || String(response.status);
+  } catch {
+    return String(response.status);
+  }
 }
 async function deployConfig() {
+  if (deployBusy) return;
   const token = document.getElementById("ghToken").value.trim();
   if (!token) {
     showToast("먼저 GitHub 토큰을 입력하세요", "warning", true);
     document.getElementById("ghToken").focus();
     return;
   }
-  localStorage.setItem("gh_token", token);
-  setDeploy("deploying");
-  const fp = currentFile();
+  const screen = screens[activeScreen];
+  // Capture the entire submission before awaiting HTTP: editing/switching is allowed.
+  const fp = screen.file,
+    label = screen.label;
+  const content = btoa(
+    unescape(encodeURIComponent(JSON.stringify(getConfig(), null, 2) + "\n")),
+  );
+  const generation = ++deployGeneration;
+  deployBusy = true;
+  document.getElementById("deployButton").disabled = true;
   try {
-    const existing = await fetch(
-      `https://api.github.com/repos/${REPO}/${REPO_N}/contents/${fp}`,
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    let sha = null;
-    if (existing.ok) sha = (await existing.json()).sha;
-    const content = btoa(
-      unescape(encodeURIComponent(JSON.stringify(getConfig(), null, 2) + "\n")),
-    );
+    localStorage.setItem("gh_token", token);
+  } catch {
+    /* Session token still works. */
+  }
+  setDeploy("deploying");
+  try {
+    const url = `https://api.github.com/repos/${REPO}/${REPO_N}/contents/${fp}`;
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+    const existing = await fetch(url, { headers });
+    if (!existing.ok && existing.status !== 404)
+      throw new Error(await responseError(existing));
+    const sha = existing.ok ? (await existing.json()).sha : null;
     const body = {
-      message:
-        "Update " + screens[activeScreen].label + " screen from web editor",
+      message: "Update " + label + " screen from web editor",
       content,
     };
     if (sha) body.sha = sha;
-    const r = await fetch(
-      `https://api.github.com/repos/${REPO}/${REPO_N}/contents/${fp}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      },
+    const r = await fetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error(await responseError(r));
+    const result = await r.json();
+    setDeploy("deployed");
+    showToast(
+      label + " 화면을 저장했습니다. 배포 진행을 확인합니다",
+      "cloud_done",
     );
-    if (r.ok) {
-      setDeploy("deployed");
-      showToast(
-        screens[activeScreen].label + " 화면을 배포했습니다",
-        "cloud_done",
-      );
-      pollActionStatus(token);
-    } else {
-      const e = await r.json();
-      setDeploy("err");
-      showToast("배포 실패: " + (e.message || r.status), "error", true);
-    }
+    if (result.commit?.sha)
+      void pollActionStatus(token, result.commit.sha, generation);
+    else setDeploy("action_unknown");
   } catch (e) {
     setDeploy("err");
     showToast("배포 실패: " + e.message, "error", true);
+  } finally {
+    deployBusy = false;
+    document.getElementById("deployButton").disabled = false;
   }
 }
-
-let deployTimer = null;
-let deployStartTime = 0;
-function setDeploy(s) {
+function setDeploy(status) {
+  stopDeployTimer();
+  clearTimeout(deployResetTimer);
   const b = document.getElementById("deployStatus"),
     t = document.getElementById("deployStatusText");
-  if (s === "deploying") {
-    stopDeployTimer();
-    b.className = "sb";
-    t.textContent = "배포 중...";
-  } else if (s === "deployed") {
-    b.className = "sb ok";
-    t.textContent = "배포 완료 \u2713";
+  const states = {
+    deploying: ["", "저장 중..."],
+    deployed: ["action", "저장 완료 · 배포 대기 중..."],
+    action_done: ["ok", "✓ 배포 완료"],
+    action_fail: ["err", "자동 빌드·배포 실패"],
+    action_unknown: ["err", "저장 완료 · 배포 상태 확인 불가"],
+    action_timeout: ["action", "저장 완료 · 배포 확인 시간 초과"],
+    err: ["err", "저장 실패"],
+    ready: ["", "준비됨"],
+  };
+  const [className, message] = states[status] || states.ready;
+  b.className = "sb " + className;
+  t.textContent = message;
+  if (status === "deployed") {
     deployStartTime = Date.now();
-    startDeployTimer();
-  } else if (s === "action_done") {
-    stopDeployTimer();
-    b.className = "sb ok";
-    t.textContent = "\u2713 바이너리 준비 완료";
-    showToast("바이너리 .rc 파일을 생성했습니다", "check_circle");
-    setTimeout(() => {
-      b.className = "sb";
-      t.textContent = "준비됨";
-    }, 8000);
-  } else if (s === "action_fail") {
-    stopDeployTimer();
-    b.className = "sb err";
-    t.textContent = "\u2717 자동 빌드 실패";
-    setTimeout(() => {
-      b.className = "sb";
-      t.textContent = "준비됨";
-    }, 8000);
-  } else if (s === "err") {
-    stopDeployTimer();
-    b.className = "sb err";
-    t.textContent = "실패";
-    setTimeout(() => {
-      b.className = "sb";
-      t.textContent = "준비됨";
-    }, 5000);
-  } else {
-    stopDeployTimer();
-    b.className = "sb";
-    t.textContent = "준비됨";
+    deployTimer = setInterval(() => {
+      const seconds = Math.round((Date.now() - deployStartTime) / 1000);
+      t.textContent = "빌드·배포 중... " + seconds + "초";
+    }, 1000);
+  } else if (status === "action_done") {
+    showToast("화면 문서 생성과 배포를 완료했습니다", "check_circle");
+    deployResetTimer = setTimeout(() => setDeploy("ready"), 8000);
   }
-}
-function startDeployTimer() {
-  stopDeployTimer();
-  deployTimer = setInterval(() => {
-    const b = document.getElementById("deployStatus"),
-      t = document.getElementById("deployStatusText");
-    const elapsed = Math.round((Date.now() - deployStartTime) / 1000);
-    const mins = Math.floor(elapsed / 60);
-    const secs = elapsed % 60;
-    const timeStr = mins > 0 ? mins + "분 " + secs + "초" : secs + "초";
-    b.className = "sb action";
-    t.textContent = "\u2699 바이너리 생성 중... " + timeStr;
-  }, 1000);
 }
 function stopDeployTimer() {
-  if (deployTimer) {
-    clearInterval(deployTimer);
-    deployTimer = null;
-  }
+  if (deployTimer) clearInterval(deployTimer);
+  deployTimer = null;
 }
-
-async function pollActionStatus(token) {
-  await new Promise((r) => setTimeout(r, 8000));
-  const wfFile = "convert.yml";
+async function pollActionStatus(token, commitSha, generation) {
   for (let i = 0; i < 60; i++) {
+    await new Promise((resolve) => setTimeout(resolve, i === 0 ? 8000 : 4000));
+    if (generation !== deployGeneration) return;
     try {
       const resp = await fetch(
-        `https://api.github.com/repos/${REPO}/${REPO_N}/actions/workflows/${wfFile}/runs?per_page=1`,
+        `https://api.github.com/repos/${REPO}/${REPO_N}/actions/workflows/convert.yml/runs?head_sha=${encodeURIComponent(commitSha)}&per_page=10`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      if (!resp.ok) break;
+      if (generation !== deployGeneration) return;
+      if (!resp.ok) throw new Error(await responseError(resp));
       const data = await resp.json();
-      const run = data.workflow_runs?.[0];
-      if (!run) {
-        await new Promise((r) => setTimeout(r, 3000));
-        continue;
+      if (generation !== deployGeneration) return;
+      const run = data.workflow_runs?.find((run) => run.head_sha === commitSha);
+      if (run?.status === "completed") {
+        setDeploy(run.conclusion === "success" ? "action_done" : "action_fail");
+        return;
       }
-      if (run.status === "completed") {
-        if (run.conclusion === "success") {
-          const finishedAt = new Date(run.updated_at).getTime();
-          if (finishedAt > deployStartTime) {
-            setDeploy("action_done");
-            return;
-          }
-        } else {
-          const finishedAt = new Date(run.updated_at).getTime();
-          if (finishedAt > deployStartTime) {
-            setDeploy("action_fail");
-            return;
-          }
-        }
-      }
-    } catch (e) {
-      break;
+    } catch {
+      if (generation === deployGeneration) setDeploy("action_unknown");
+      return;
     }
-    await new Promise((r) => setTimeout(r, 4000));
   }
-  stopDeployTimer();
+  if (generation === deployGeneration) setDeploy("action_timeout");
 }
 function toggleToken() {
   const i = document.getElementById("ghToken"),
