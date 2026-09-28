@@ -163,6 +163,16 @@
       "text": "앱 업데이트 없이 브라우저에서 화면을 바꿔 보세요.",
       "color": "#9CA3AF",
       "fontSize": 12
+    },
+    {
+      "type": "button",
+      "id": "67",
+      "text": "버튼",
+      "color": "#6200EA",
+      "textColor": "#FFFFFF",
+      "fontSize": 16,
+      "cornerRadius": 24,
+      "actionName": "btn_67"
     }
   ]
 }
