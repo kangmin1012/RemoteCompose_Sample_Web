@@ -69,3 +69,9 @@ Editor의 Deploy에는 대상 저장소에 **Contents: Read and write**, **Actio
 ## 참고 코드
 
 [armcha/remotecompose](https://github.com/armcha/remotecompose), 기준 커밋 `b80e896840e74cc33d18d65bb382931eddc1e3fd`의 Editor·변환기·미리보기·예제를 기반으로 합니다. 동작을 보존하면서 HTML/CSS/JS와 기본 데이터를 분리하고 포맷을 정리했습니다. Reset이 없는 화면을 참조하던 오류를 수정했으며, 배포 대상을 이 저장소로 변경했습니다. Remote Compose 버전은 앱과 동일한 `1.0.0-alpha20`입니다.
+
+## 버전이 고정된 화면 배포
+
+Pages는 `config.manifest.json`, `config_detail.manifest.json`과 `documents/<이름>.<SHA-256>.rc`를 같은 배포에 게시합니다. 명세에는 소스 커밋, JSON 해시, 바이너리 해시와 상대 파일 경로가 들어 있습니다. 앱 1.1부터는 이 명세를 읽고 문서 해시를 검증한 뒤 적용합니다. 기존 `config*.rc`와 저장소의 생성 파일도 이전 앱과의 호환을 위해 유지합니다.
+
+CI는 화면 JSON만 변환한 직후 게시 파일을 구성하므로, 이후 생성 파일 커밋의 rebase가 게시할 JSON과 바이너리를 뒤섞지 않습니다. `scripts/build-release.mjs`와 `tests/release.test.mjs`가 이 배포 계약을 관리합니다.

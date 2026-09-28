@@ -33,7 +33,16 @@ jobs:
           cache: gradle
       - name: Generate binary documents
         working-directory: server
-        run: ./gradlew run --args="--dir $GITHUB_WORKSPACE $GITHUB_WORKSPACE"
+        run: |
+          mkdir -p "$RUNNER_TEMP/remote-configs"
+          cp "$GITHUB_WORKSPACE"/config*.json "$RUNNER_TEMP/remote-configs/"
+          ./gradlew run --args="--dir $RUNNER_TEMP/remote-configs $GITHUB_WORKSPACE"
+      - name: Prepare versioned public site
+        run: |
+          mkdir _site
+          cp index.html config*.json config*.rc _site/
+          cp -R assets preview _site/
+          node scripts/build-release.mjs . _site "$GITHUB_SHA"
       - name: Commit generated documents
         run: |
           git config user.name "github-actions[bot]"
@@ -44,11 +53,6 @@ jobs:
             git pull --rebase origin master
             git push origin HEAD:master
           fi
-      - name: Prepare public site
-        run: |
-          mkdir _site
-          cp index.html config*.json config*.rc _site/
-          cp -R assets preview _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
