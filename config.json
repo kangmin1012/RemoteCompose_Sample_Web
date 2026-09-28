@@ -121,6 +121,15 @@
           "fontSize": 14,
           "cornerRadius": 24,
           "actionName": "action_b"
+        },
+        {
+          "type": "button",
+          "id": "69",
+          "text": "버튼",
+          "color": "#6200EA",
+          "textColor": "#FFFFFF",
+          "fontSize": 14,
+          "cornerRadius": 20
         }
       ]
     },
