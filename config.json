@@ -1,5 +1,5 @@
 {
-  "backgroundColor": "#ECE6F9",
+  "backgroundColor": "#FDAFC3",
   "elements": [
     {
       "type": "text",
@@ -119,17 +119,15 @@
           "color": "#00897B",
           "textColor": "#FFFFFF",
           "fontSize": 14,
-          "cornerRadius": 24,
+          "cornerRadius": 10,
           "actionName": "action_b"
         },
         {
-          "type": "button",
-          "id": "53",
-          "text": "추가된 버튼",
-          "color": "#667FFF",
-          "textColor": "#FFFFFF",
-          "fontSize": 14,
-          "cornerRadius": 20
+          "type": "text",
+          "id": "69",
+          "text": "새 텍스트",
+          "color": "#333333",
+          "fontSize": 14
         }
       ]
     },
@@ -172,6 +170,16 @@
       "text": "앱 업데이트 없이 브라우저에서 화면을 바꿔 보세요.",
       "color": "#9CA3AF",
       "fontSize": 12
+    },
+    {
+      "type": "button",
+      "id": "70",
+      "text": "테스트 버튼",
+      "color": "#6200EA",
+      "textColor": "#FFFFFF",
+      "fontSize": 16,
+      "cornerRadius": 24,
+      "actionName": "btn_70"
     }
   ]
 }
